@@ -223,7 +223,7 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
   }, [channel, client, session, addPendingMessage, addMessage]);
 
   // Keyboard shortcuts
-  useInput((input, key) => {
+  useInput((input: string, key: any) => {
     if (key.ctrl && input.toLowerCase() === 'c') {
       exit();
       return;

@@ -14,7 +14,7 @@ interface MultiLineInputProps {
 export function MultiLineInput({ placeholder = '> ', onSubmit, disabled = false }: MultiLineInputProps) {
   const [value, setValue] = useState('');
 
-  useInput((input, key) => {
+  useInput((input: string, key: any) => {
     if (disabled) return;
 
     if (key.return) {

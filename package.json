@@ -40,8 +40,8 @@
     "theater-client": "file:../theater-client"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "@types/react": "^18.2.0",
+    "@types/node": "^24.0.3",
+    "@types/react": "^19.1.8",
     "concurrently": "^8.2.2",
     "react-devtools-core": "^6.1.2",
     "typescript": "^5.3.0"
