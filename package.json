@@ -1,0 +1,62 @@
+{
+  "name": "git-theater",
+  "version": "1.0.0",
+  "description": "Git workflows powered by AI - streamlined interface for git-chat-assistant",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "author": "Colin Rozzi",
+  "license": "MIT",
+  "bin": {
+    "git-theater": "./dist/index.js",
+    "commit": "./dist/index.js",
+    "review": "./dist/index.js", 
+    "rebase": "./dist/index.js",
+    "git-chat": "./dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "bun dist/index.js",
+    "dev": "bun --watch src/index.ts",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "dev:build": "concurrently \"tsc --watch\" \"bun --watch dist/index.js\"",
+    "test": "echo 'No tests yet'",
+    "prepublishOnly": "bun run build",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "ink": "^4.4.1",
+    "ink-spinner": "^5.0.0",
+    "ink-text-input": "^5.0.1",
+    "react": "^18.2.0",
+    "theater-client": "file:../theater-client"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "typescript": "^5.3.0",
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "bun": ">=1.0.0",
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "git",
+    "ai",
+    "theater",
+    "commit", 
+    "review",
+    "rebase",
+    "workflow",
+    "cli"
+  ]
+}
