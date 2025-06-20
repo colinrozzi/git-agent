@@ -10,7 +10,7 @@
   "bin": {
     "git-theater": "./dist/index.js",
     "commit": "./dist/index.js",
-    "review": "./dist/index.js", 
+    "review": "./dist/index.js",
     "rebase": "./dist/index.js",
     "git-chat": "./dist/index.js"
   },
@@ -42,8 +42,9 @@
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.0",
-    "typescript": "^5.3.0",
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "react-devtools-core": "^6.1.2",
+    "typescript": "^5.3.0"
   },
   "engines": {
     "bun": ">=1.0.0",
@@ -53,7 +54,7 @@
     "git",
     "ai",
     "theater",
-    "commit", 
+    "commit",
     "review",
     "rebase",
     "workflow",
