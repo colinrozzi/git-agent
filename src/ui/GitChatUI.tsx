@@ -43,13 +43,7 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
 
   const { exit } = useApp();
 
-  // Setup steps for git workflows
-  const setupSteps = {
-    connecting: 'Connecting to Theater...',
-    opening_channel: 'Opening communication channel...',
-    loading_actor: `Starting ${workflow} workflow...`,
-    ready: `${workflow.charAt(0).toUpperCase() + workflow.slice(1)} workflow ready!`
-  };
+  // Setup steps moved inline to avoid dependency issues
 
   // Add message helper
   const addMessage = useCallback((role: Message['role'], content: string, status: Message['status'] = 'complete', toolName?: string, toolArgs?: string[]) => {
@@ -93,21 +87,21 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
     });
   }, []);
 
-  // Setup channel communication
+  // Setup channel communication - FIXED: stable dependencies only
   useEffect(() => {
     async function setupChannel() {
       try {
         setSetupStatus('connecting');
-        setSetupMessage(setupSteps.connecting);
+        setSetupMessage('Connecting to Theater...');
         await new Promise(resolve => setTimeout(resolve, 500));
 
         setSetupStatus('opening_channel');
-        setSetupMessage(setupSteps.opening_channel);
+        setSetupMessage('Opening communication channel...');
 
         const channelStream = await client.openChannelStream(session.chatActorId);
 
         setSetupStatus('loading_actor');
-        setSetupMessage(setupSteps.loading_actor);
+        setSetupMessage(`Starting ${workflow} workflow...`);
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Set up message handler
@@ -131,7 +125,27 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
                     if (block?.type === 'text' && block?.text) {
                       fullContent += block.text;
                     } else if (block?.type === 'tool_use') {
-                      addToolMessage(block?.name || 'unknown', block?.input ? Object.values(block.input) : []);
+                      // Handle tool messages directly - no callback dependency
+                      setMessages(prev => {
+                        const newMessages = [...prev];
+                        const toolMessage: Message = {
+                          role: 'tool',
+                          content: '',
+                          timestamp: new Date(),
+                          status: 'complete',
+                          toolName: block?.name || 'unknown',
+                          toolArgs: block?.input ? Object.values(block.input) : []
+                        };
+
+                        // Insert tool message before last assistant message
+                        const lastAssistantIndex = newMessages.map(m => m.role).lastIndexOf('assistant');
+                        if (lastAssistantIndex !== -1) {
+                          newMessages.splice(lastAssistantIndex, 0, toolMessage);
+                          return newMessages;
+                        } else {
+                          return [...prev, toolMessage];
+                        }
+                      });
                     }
                   }
 
@@ -176,7 +190,13 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
               }
             }
           } catch (error) {
-            addMessage('system', `Error: ${error instanceof Error ? error.message : String(error)}`, 'complete');
+            // Handle errors directly - no callback dependency
+            setMessages(prev => [...prev, {
+              role: 'system',
+              content: `Error: ${error instanceof Error ? error.message : String(error)}`,
+              timestamp: new Date(),
+              status: 'complete'
+            }]);
             setIsGenerating(false);
           }
         });
@@ -197,7 +217,7 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
     }
 
     setupChannel();
-  }, [client, session, addMessage, addToolMessage, setupSteps]);
+  }, [client, session, workflow]); // FIXED: Only stable dependencies
 
   // Send message function
   const sendMessage = useCallback(async (messageText: string) => {
