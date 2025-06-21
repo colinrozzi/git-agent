@@ -161,9 +161,9 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
 
                 }
 
-                // If stop reason is not 'end_turn', add another pending message
+                // If stop reason is not 'end_turn' and there is not an existing pending message, add another pending message
                 // as the assistant will continue after tool execution
-                if (stopReason && stopReason !== 'end_turn') {
+                if (stopReason && stopReason !== 'end_turn' && !messages.some(m => m.role === 'assistant' && m.status === 'pending')) {
                   debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
                   addPendingMessage('assistant', '');
                 } else {
