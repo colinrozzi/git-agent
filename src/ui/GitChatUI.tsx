@@ -96,13 +96,9 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
                   }
 
                   if (fullContent.trim()) {
-                    // Debug: Log what we're trying to update
-                    console.log('DEBUG: Assistant text:', fullContent.substring(0, 100) + '...');
                     updateLastPendingMessage(fullContent);
                   }
                 } else if (typeof messageContent === 'string') {
-                  // Debug: Log string content
-                  console.log('DEBUG: String content:', messageContent.substring(0, 100) + '...');
                   updateLastPendingMessage(messageContent);
                 }
 
