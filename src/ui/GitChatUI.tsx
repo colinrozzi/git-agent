@@ -111,14 +111,14 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
 
                 if (Array.isArray(messageContent)) {
                   let textContent = '';
-                  
+
                   // Process all content blocks
                   for (const block of messageContent) {
                     if (block?.type === 'text' && block?.text) {
                       textContent += block.text;
                     } else if (block?.type === 'tool_use') {
                       // Add tool message immediately
-                      addToolMessage(block?.name || 'unknown', 
+                      addToolMessage(block?.name || 'unknown',
                         block?.input ? Object.values(block.input) : []);
                     }
                   }
@@ -197,9 +197,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
       const lastMessage = messages[messages.length - 1];
       if (lastMessage?.role === 'assistant' && !isGenerating) {
         // Delay to show final message, then auto-exit
-        setTimeout(() => {
-          setWorkflowCompleted(true);
-        }, 2000);
+        setWorkflowCompleted(true);
       }
     }
   }, [isGenerating, messages, currentMode]);
@@ -289,7 +287,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
                     }}
                   />
                 ))}
-                
+
                 {/* Show loading indicator when generating */}
                 {isGenerating && <LoadingIndicator />}
               </>
