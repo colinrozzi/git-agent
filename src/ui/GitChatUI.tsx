@@ -257,7 +257,7 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
   }, [channel]);
 
   return (
-    <Box flexDirection="column" height="100%">
+    <Box flexDirection="column" height="100%" width="100%">
       {showHelp && (
         <HelpPanel
           shortcuts={[
@@ -271,15 +271,15 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
       )}
 
       {setupStatus !== 'ready' ? (
-        <Box flexDirection="column" flexGrow={1} paddingLeft={1} paddingRight={1} justifyContent="center">
-          <Box justifyContent="center" marginBottom={1}>
+        <Box flexDirection="column" flexGrow={1} width="100%" justifyContent="center" alignItems="flex-start">
+          <Box paddingLeft={1}>
             <Spinner type="dots" />
             <Text color="cyan"> {setupMessage}</Text>
           </Box>
         </Box>
       ) : (
         <>
-          <Box flexDirection="column" flexGrow={1} paddingLeft={1} paddingRight={1}>
+          <Box flexDirection="column" flexGrow={1} width="100%" paddingLeft={1} paddingRight={1}>
             {messages.length === 0 ? (
               <Text color="gray" dimColor>
                 [git] Ready for {workflow} workflow. Type your questions or let me analyze the repository.
@@ -300,18 +300,18 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
                 />
               ))
             )}
-
-
           </Box>
 
-          <Box paddingLeft={1} paddingRight={1} paddingBottom={1}>
-            <SmartInput
-              placeholder={isGenerating ? "Processing..." : "Message: "}
-              onSubmit={sendMessage}
-              disabled={isGenerating}
-              mode="auto"
-              autoMultilineThreshold={50}
-            />
+          <Box width="100%" paddingLeft={1} paddingRight={1} paddingBottom={1}>
+            <Box width="100%">
+              <SmartInput
+                placeholder={isGenerating ? "Processing..." : "Message: "}
+                onSubmit={sendMessage}
+                disabled={isGenerating}
+                mode="auto"
+                autoMultilineThreshold={50}
+              />
+            </Box>
           </Box>
         </>
       )}
