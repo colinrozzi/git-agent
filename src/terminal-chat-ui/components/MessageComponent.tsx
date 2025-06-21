@@ -8,9 +8,9 @@ import type { MessageComponentProps } from '../types/ui.js';
 /**
  * Simplified message component - all messages are complete when rendered
  */
-export function MessageComponent({ 
-  message, 
-  toolDisplayMode, 
+export function MessageComponent({
+  message,
+  toolDisplayMode,
   variant = 'default',
   prefixOverrides = {},
   contentColor,
@@ -54,7 +54,7 @@ export function MessageComponent({
   // Default colors based on role
   const getContentColor = (role: string) => {
     if (contentColor) return contentColor;
-    
+
     return {
       user: 'gray',
       assistant: 'white',
@@ -67,16 +67,16 @@ export function MessageComponent({
 
   // Handle tool messages specially
   if (role === 'tool') {
-    return <ToolMessage 
-      toolName={toolName || 'unknown'} 
-      toolArgs={toolArgs || []} 
+    return <ToolMessage
+      toolName={toolName || 'unknown'}
+      toolArgs={toolArgs || []}
       toolDisplayMode={toolDisplayMode}
       prefix={prefixes.tool}
     />;
   }
 
   // Skip empty assistant messages (when only tools were used)
-  if (role === 'assistant' && !content.trim()) {
+  if (!content.trim()) {
     return null;
   }
 
@@ -93,7 +93,7 @@ export function MessageComponent({
           {index === 0 ? prefix : hasMultipleLines ? '   ' : ''}{line || ' '}
         </Text>
       ))}
-      
+
       {/* Optional timestamp */}
       {showTimestamp && (
         <Text color="gray" dimColor>
