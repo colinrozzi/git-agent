@@ -166,7 +166,8 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
                 if (stopReason && stopReason !== 'end_turn') {
                   debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
                   // If there is no pending message, add a new one
-                  if (!messages.some(m => m.role === 'assistant' && m.status === 'pending')) {
+                  const hasPendingMessage = messages.some(m => m.role === 'assistant' && m.status === 'pending');
+                  if (!hasPendingMessage) {
                     debugLog('➕ [ADDING NEW PENDING MESSAGE]');
                     addPendingMessage('assistant', '');
                   }
@@ -199,7 +200,7 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
     }
 
     setupChannel();
-  }, [client, session, workflow, addMessage, addToolMessage, updateLastPendingMessage]);
+  }, [client, session, workflow, addMessage, addToolMessage, updateLastPendingMessage, addPendingMessage]);
 
   // Send message function
   const sendMessage = useCallback(async (messageText: string) => {
@@ -270,8 +271,11 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
       )}
 
       {setupStatus !== 'ready' ? (
-        <Box flexDirection="column" flexGrow={1} paddingLeft={1} paddingRight={1}>
-          {/* StatusHeader shows the setup status, so we don't need extra content here */}
+        <Box flexDirection="column" flexGrow={1} paddingLeft={1} paddingRight={1} justifyContent="center">
+          <Box justifyContent="center" marginBottom={1}>
+            <Spinner type="dots" />
+            <Text color="cyan"> {setupMessage}</Text>
+          </Box>
         </Box>
       ) : (
         <>
@@ -297,12 +301,7 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
               ))
             )}
 
-            {isGenerating && (
-              <Box marginBottom={1}>
-                <Spinner type="dots" />
-                <Text color="yellow"> Working on it...</Text>
-              </Box>
-            )}
+
           </Box>
 
           <Box paddingLeft={1} paddingRight={1} paddingBottom={1}>

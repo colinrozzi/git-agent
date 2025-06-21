@@ -3,6 +3,7 @@
  */
 
 import { Box, Text } from 'ink';
+import Spinner from 'ink-spinner';
 import type { MessageComponentProps } from '../types/ui.js';
 
 /**
@@ -95,6 +96,52 @@ export function MessageComponent({
           {message.timestamp.toLocaleTimeString()}
         </Text>
       )}
+    </Box>
+  );
+}
+
+/**
+ * Pending assistant message with spinner
+ */
+interface PendingAssistantMessageProps {
+  content: string;
+  prefix: string;
+  color: string;
+}
+
+function PendingAssistantMessage({ content, prefix, color }: PendingAssistantMessageProps) {
+  // If there's content, show it with a typing indicator
+  if (content.trim()) {
+    const lines = content.split('\n');
+    const hasMultipleLines = lines.length > 1;
+
+    return (
+      <Box flexDirection="column" marginBottom={1}>
+        {/* Existing content */}
+        {lines.map((line, index) => (
+          <Text key={index} color={color}>
+            {index === 0 ? prefix : hasMultipleLines ? '   ' : ''}{line || ' '}
+          </Text>
+        ))}
+        
+        {/* Typing indicator on a new line */}
+        <Box>
+          <Text color="gray" dimColor>
+            {'   '}
+          </Text>
+          <Spinner type="dots" />
+          <Text color="gray" dimColor> typing...</Text>
+        </Box>
+      </Box>
+    );
+  }
+
+  // If no content yet, show just the spinner with prefix
+  return (
+    <Box marginBottom={1}>
+      <Text color={color}>{prefix}</Text>
+      <Spinner type="dots" />
+      <Text color="gray" dimColor> thinking...</Text>
     </Box>
   );
 }
