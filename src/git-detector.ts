@@ -119,7 +119,7 @@ function getWorkflowConfig(workflow: GitWorkflow) {
       title: "Git Commit Assistant",
       description: "Automated git commit workflow assistant",
       model_config: {
-        model: "gemini-1.5-pro",
+        model: "gemini-2.0-flash",
         provider: "google"
       }
     },
