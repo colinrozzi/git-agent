@@ -55,7 +55,7 @@ export function useMessageState() {
     });
   }, []);
 
-  // Add a tool message (insert before last assistant message)
+  // Add a tool message (append after last non-pending assistant message)
   const addToolMessage = useCallback((toolName: string, toolArgs: string[] = []) => {
     setMessages(prev => {
       const newMessages = [...prev];
@@ -68,14 +68,18 @@ export function useMessageState() {
         toolArgs
       };
 
-      // Insert tool message before last assistant message
-      const lastAssistantIndex = newMessages.map(m => m.role).lastIndexOf('assistant');
-      if (lastAssistantIndex !== -1) {
-        newMessages.splice(lastAssistantIndex, 0, toolMessage);
-        return newMessages;
-      } else {
-        return [...prev, toolMessage];
+      // Find the last non-pending assistant message and insert tool after it
+      let insertIndex = newMessages.length;
+      for (let i = newMessages.length - 1; i >= 0; i--) {
+        const message = newMessages[i];
+        if (message.role === 'assistant' && message.status !== 'pending') {
+          insertIndex = i + 1;
+          break;
+        }
       }
+      
+      newMessages.splice(insertIndex, 0, toolMessage);
+      return newMessages;
     });
   }, []);
 
