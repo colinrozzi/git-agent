@@ -96,9 +96,13 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
                   }
 
                   if (fullContent.trim()) {
+                    // Debug: Log what we're trying to update
+                    console.log('DEBUG: Assistant text:', fullContent.substring(0, 100) + '...');
                     updateLastPendingMessage(fullContent);
                   }
                 } else if (typeof messageContent === 'string') {
+                  // Debug: Log string content
+                  console.log('DEBUG: String content:', messageContent.substring(0, 100) + '...');
                   updateLastPendingMessage(messageContent);
                 }
 
@@ -113,7 +117,8 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
 
         setChannel(channelStream);
 
-        // Start git workflow
+        // Start git workflow - add pending assistant message first
+        addPendingMessage('assistant', '');
         await new Promise(resolve => setTimeout(resolve, 100));
         await client.startGitWorkflow(session.domainActor);
 
@@ -220,7 +225,7 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
           <Box flexDirection="column" flexGrow={1} paddingLeft={1} paddingRight={1}>
             {messages.length === 0 ? (
               <Text color="gray" dimColor>
-                ℹ️ git: Ready for {workflow} workflow. Type your questions or let me analyze the repository.
+                [git] Ready for {workflow} workflow. Type your questions or let me analyze the repository.
               </Text>
             ) : (
               messages.map((message, index) => (
@@ -230,9 +235,9 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
                   toolDisplayMode={toolDisplayMode}
                   variant="git"
                   prefixOverrides={{
-                    user: '👤 You: ',
+                    user: 'You: ',
                     assistant: 'Assistant: ',
-                    system: 'ℹ️ git: ',
+                    system: '[git] ',
                     tool: '[tool] '
                   }}
                 />
