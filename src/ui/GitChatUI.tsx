@@ -163,9 +163,13 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
 
                 // If stop reason is not 'end_turn' and there is not an existing pending message, add another pending message
                 // as the assistant will continue after tool execution
-                if (stopReason && stopReason !== 'end_turn' && !messages.some(m => m.role === 'assistant' && m.status === 'pending')) {
+                if (stopReason && stopReason !== 'end_turn') {
                   debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
-                  addPendingMessage('assistant', '');
+                  // If there is no pending message, add a new one
+                  if (!messages.some(m => m.role === 'assistant' && m.status === 'pending')) {
+                    debugLog('➕ [ADDING NEW PENDING MESSAGE]');
+                    addPendingMessage('assistant', '');
+                  }
                 } else {
                   debugLog('✅ [COMPLETED] Stop reason:', stopReason, '- finishing generation');
                   setIsGenerating(false);
@@ -250,11 +254,6 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
       }
     };
   }, [channel]);
-
-  // Create git-specific header content
-  const workflowTitle = workflow.charAt(0).toUpperCase() + workflow.slice(1);
-  const repoName = repoPath.split('/').pop() || 'Repository';
-  const title = `Git ${workflowTitle} Assistant`;
 
   return (
     <Box flexDirection="column" height="100%">
