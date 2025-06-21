@@ -133,7 +133,6 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
                       fullContent += block.text;
                     } else if (block?.type === 'tool_use') {
                       debugLog('🔧 [TOOL BLOCK]:', block.name, 'with input:', block.input);
-                      // Collect tool calls to add before the text
                       toolCalls.push({
                         name: block?.name || 'unknown',
                         args: block?.input ? Object.values(block.input) : []
@@ -144,19 +143,15 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
                   debugLog('🔧 [TOOL CALLS TO ADD]:', toolCalls.length);
                   debugLog('📝 [FULL TEXT CONTENT]:', fullContent.substring(0, 200) + '...');
 
-                  // Add tool messages first (they execute before the text response)
-                  for (const toolCall of toolCalls) {
-                    debugLog('➕ [ADDING TOOL MESSAGE]:', toolCall.name, toolCall.args);
-                    addToolMessage(toolCall.name, toolCall.args);
-                  }
-
-                  // Then add the text content - only update if we have actual content
                   if (fullContent.trim()) {
                     debugLog('➕ [UPDATING PENDING MESSAGE WITH CONTENT]:', fullContent.substring(0, 100) + '...');
                     updateLastPendingMessage(fullContent);
                   }
-                  // Don't update the pending message if content is empty - leave it pending for the next response
 
+                  for (const toolCall of toolCalls) {
+                    debugLog('➕ [ADDING TOOL MESSAGE]:', toolCall.name, toolCall.args);
+                    addToolMessage(toolCall.name, toolCall.args);
+                  }
                 } else if (typeof messageContent === 'string' && messageContent.trim()) {
                   debugLog('📝 [UPDATING WITH STRING CONTENT]:', messageContent.substring(0, 100) + '...');
                   updateLastPendingMessage(messageContent);
@@ -168,6 +163,7 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
                   debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
                   // If there is no pending message, add a new one
                   const hasPendingMessage = messages.some(m => m.role === 'assistant' && m.status === 'pending');
+                  debugLog('🔍 [HAS PENDING MESSAGE]:', hasPendingMessage);
                   if (!hasPendingMessage) {
                     debugLog('➕ [ADDING NEW PENDING MESSAGE]');
                     addPendingMessage('assistant', '');

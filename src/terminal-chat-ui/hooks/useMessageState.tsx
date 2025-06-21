@@ -10,10 +10,10 @@ import type { Message } from '../types/common.js';
 const DEBUG_LOG_FILE = '/tmp/git-theater-debug.log';
 function debugLog(...args: any[]) {
   const timestamp = new Date().toISOString();
-  const message = `[${timestamp}] ${args.map(arg => 
+  const message = `[${timestamp}] ${args.map(arg =>
     typeof arg === 'string' ? arg : JSON.stringify(arg, null, 2)
   ).join(' ')}\n`;
-  
+
   try {
     fs.appendFileSync(DEBUG_LOG_FILE, message);
   } catch (error) {
@@ -29,8 +29,8 @@ export function useMessageState() {
 
   // Add a new message
   const addMessage = useCallback((
-    role: Message['role'], 
-    content: string, 
+    role: Message['role'],
+    content: string,
     status: Message['status'] = 'complete',
     toolName?: string,
     toolArgs?: string[]
@@ -84,7 +84,7 @@ export function useMessageState() {
     setMessages(prev => {
       const newMessages = [...prev];
       debugLog('📊 [useMessageState] Current messages before tool add:', newMessages.length);
-      
+
       const toolMessage: Message = {
         role: 'tool',
         content: '',
@@ -94,19 +94,12 @@ export function useMessageState() {
         toolArgs
       };
 
-      // Find the last pending assistant message and insert tool before it
-      let insertIndex = newMessages.length;
-      for (let i = newMessages.length - 1; i >= 0; i--) {
-        const message = newMessages[i];
-        if (message.role === 'assistant' && message.status === 'pending') {
-          insertIndex = i;
-          debugLog('🎯 [useMessageState] Found pending assistant at index:', i, '- inserting tool before it');
-          break;
-        }
-      }
-      
-      debugLog('📋 [useMessageState] Inserting tool message at index:', insertIndex);
-      newMessages.splice(insertIndex, 0, toolMessage);
+      // Find the last pending assistant message and append the tool message after it
+      //let insertIndex = newMessages.length;
+
+      //debugLog('📋 [useMessageState] Inserting tool message at index:', insertIndex);
+      //newMessages.splice(insertIndex, 0, toolMessage);
+      newMessages.push(toolMessage);
       debugLog('📊 [useMessageState] Messages after tool add:', newMessages.length);
       return newMessages;
     });
