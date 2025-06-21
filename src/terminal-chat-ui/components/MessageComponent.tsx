@@ -76,6 +76,20 @@ export function MessageComponent({
     />;
   }
 
+  // Handle pending assistant messages with spinner
+  if (role === 'assistant' && status === 'pending') {
+    return <PendingAssistantMessage 
+      content={content}
+      prefix={prefixes.assistant}
+      color={roleColor}
+    />;
+  }
+
+  // Skip empty assistant messages (when only tools were used)
+  if (role === 'assistant' && !content.trim()) {
+    return null;
+  }
+
   // Handle regular messages
   const lines = content.split('\n');
   const hasMultipleLines = lines.length > 1;
