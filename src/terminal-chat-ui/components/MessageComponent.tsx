@@ -81,7 +81,8 @@ export function MessageComponent({
   }
 
   // Handle regular messages - all are complete, no pending state
-  const lines = content.split('\n');
+  const trimmed_content = content.trim();
+  const lines = trimmed_content.split('\n');
   const hasMultipleLines = lines.length > 1;
   const prefix = prefixes[role] || '';
 
