@@ -116,18 +116,17 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
                   for (const block of messageContent) {
                     if (block?.type === 'text' && block?.text) {
                       textContent += block.text;
+
+                      // Add text content as a regular message if we have any
+                      if (textContent.trim()) {
+                        addMessage('assistant', textContent);
+                      }
                     } else if (block?.type === 'tool_use') {
                       // Add tool message immediately
                       addToolMessage(block?.name || 'unknown',
                         block?.input ? Object.values(block.input) : []);
                     }
                   }
-
-                  // Add text content as a regular message if we have any
-                  if (textContent.trim()) {
-                    addMessage('assistant', textContent);
-                  }
-
                 } else if (typeof messageContent === 'string' && messageContent.trim()) {
                   // Add string content as a regular message
                   addMessage('assistant', messageContent);
