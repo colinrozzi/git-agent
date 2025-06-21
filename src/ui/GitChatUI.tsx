@@ -186,8 +186,8 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
   // Create git-specific header content
   const workflowTitle = workflow.charAt(0).toUpperCase() + workflow.slice(1);
   const repoName = repository.path.split('/').pop() || 'Repository';
-  const title = `🎭 Git ${workflowTitle} Assistant`;
-  const subtitle = `📁 ${repoName} • 🌿 ${repository.currentBranch}${repository.hasUncommittedChanges ? ' • ⚠️ Changes pending' : ''}`;
+  const title = `Git ${workflowTitle} Assistant`;
+  const subtitle = `${repoName} • ${repository.currentBranch}${repository.hasUncommittedChanges ? ' • Changes pending' : ''}`;
 
   return (
     <Box flexDirection="column" height="100%">
@@ -231,9 +231,9 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
                   variant="git"
                   prefixOverrides={{
                     user: '👤 You: ',
-                    assistant: '🤖 Assistant: ',
+                    assistant: 'Assistant: ',
                     system: 'ℹ️ git: ',
-                    tool: '🔧 '
+                    tool: '[tool] '
                   }}
                 />
               ))
@@ -249,7 +249,7 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
 
           <Box paddingLeft={1} paddingRight={1} paddingBottom={1}>
             <SmartInput
-              placeholder={isGenerating ? "Processing..." : "💬 "}
+              placeholder={isGenerating ? "Processing..." : "Message: "}
               onSubmit={sendMessage}
               disabled={isGenerating}
               mode="auto"

@@ -123,9 +123,9 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
     const repository = analyzeRepository(repoPath);
 
     if (options.verbose) {
-      console.log(chalk.cyan(`🔍 Detected repository: ${repository.path}`));
-      console.log(chalk.gray(`📁 Branch: ${repository.currentBranch}`));
-      console.log(chalk.gray(`📊 Status: ${repository.isClean ? 'Clean' : 'Has changes'}`));
+      console.log(chalk.cyan(`Detected repository: ${repository.path}`));
+      console.log(chalk.gray(`Branch: ${repository.currentBranch}`));
+      console.log(chalk.gray(`Status: ${repository.isClean ? 'Clean' : 'Has changes'}`));
       if (!repository.isClean) {
         console.log(chalk.gray(`   Modified: ${repository.modifiedFiles.length}`));
         console.log(chalk.gray(`   Untracked: ${repository.untrackedFiles.length}`));
@@ -137,9 +137,9 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
     const config = buildGitConfig(workflow, repoPath);
 
     if (options.verbose) {
-      console.log(chalk.cyan(`🎭 Starting ${workflow} workflow...`));
-      console.log(chalk.gray(`🎯 Using git-chat-assistant actor`));
-      console.log(chalk.gray(`🔗 Connecting to ${options.server || '127.0.0.1:9000'}`));
+      console.log(chalk.cyan(`Starting ${workflow} workflow...`));
+      console.log(chalk.gray(`Using git-chat-assistant actor`));
+      console.log(chalk.gray(`Connecting to ${options.server || '127.0.0.1:9000'}`));
     }
 
     // Create client and start session
@@ -147,7 +147,7 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
     session = await client.startGitSession(config);
 
     if (options.verbose) {
-      console.log(chalk.green(`✅ Session started - Domain: ${session.domainActor.id}, Chat: ${session.chatActorId}`));
+      console.log(chalk.green(`Session started - Domain: ${session.domainActor.id}, Chat: ${session.chatActorId}`));
     }
 
     // Show workflow banner
@@ -183,12 +183,12 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
 function showWorkflowBanner(workflow: GitWorkflow, repository: any): void {
   const workflowInfo = {
     commit: {
-      emoji: '📝',
+      emoji: '',
       title: 'Commit Workflow',
       description: 'Analyze changes and create meaningful commits'
     },
     review: {
-      emoji: '🔍', 
+      emoji: '', 
       title: 'Code Review',
       description: 'Review changes and provide feedback'
     },
@@ -198,7 +198,7 @@ function showWorkflowBanner(workflow: GitWorkflow, repository: any): void {
       description: 'Clean up commit history'
     },
     chat: {
-      emoji: '💬',
+      emoji: '',
       title: 'Git Assistant',
       description: 'General git workflow assistance'
     }
@@ -209,12 +209,12 @@ function showWorkflowBanner(workflow: GitWorkflow, repository: any): void {
 
   console.log(chalk.cyan(`\n${info.emoji} ${info.title}`));
   console.log(chalk.gray(`${info.description}`));
-  console.log(chalk.gray(`📁 Repository: ${repoName} (${repository.currentBranch})`));
+  console.log(chalk.gray(`Repository: ${repoName} (${repository.currentBranch})`));
   
   if (repository.hasUncommittedChanges) {
-    console.log(chalk.yellow(`⚠️  ${repository.modifiedFiles.length + repository.untrackedFiles.length + repository.stagedFiles.length} files with changes`));
+    console.log(chalk.yellow(`${repository.modifiedFiles.length + repository.untrackedFiles.length + repository.stagedFiles.length} files with changes`));
   } else {
-    console.log(chalk.green(`✅ Working directory clean`));
+    console.log(chalk.green(`Working directory clean`));
   }
   
   console.log(''); // Empty line before UI starts

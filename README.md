@@ -4,11 +4,11 @@
 
 ## Features
 
-🎯 **One Command, Smart Workflows** - Just type `commit`, `review`, or `rebase` in any git repository  
-🔍 **Auto Repository Detection** - Automatically finds and analyzes your git repository  
-🤖 **AI-Powered Git Assistant** - Uses your git-chat-assistant actor for intelligent git operations  
-⚡ **Zero Configuration** - Works out of the box with sensible defaults  
-🎨 **Rich Terminal UI** - Beautiful, interactive interface built with Ink  
+**One Command, Smart Workflows** - Just type `commit`, `review`, or `rebase` in any git repository  
+**Auto Repository Detection** - Automatically finds and analyzes your git repository  
+**AI-Powered Git Assistant** - Uses your git-chat-assistant actor for intelligent git operations  
+**Zero Configuration** - Works out of the box with sensible defaults  
+**Rich Terminal UI** - Beautiful, interactive interface built with Ink  
 
 ## Quick Start
 
@@ -142,11 +142,11 @@ git-theater → GitTheaterClient → git-chat-assistant → chat-state + git-too
 
 ### Workflow Process
 
-1. **🔍 Repository Detection** - Automatically finds the git repository
-2. **📊 Repository Analysis** - Analyzes git status, branches, and changes  
-3. **🎭 Actor Setup** - Starts git-chat-assistant with workflow-specific configuration
-4. **🤖 Workflow Automation** - Triggers appropriate workflow (commit/review/rebase)
-5. **💬 Interactive Chat** - Provides real-time chat interface with git context
+1. **Repository Detection** - Automatically finds the git repository
+2. **Repository Analysis** - Analyzes git status, branches, and changes  
+3. **Actor Setup** - Starts git-chat-assistant with workflow-specific configuration
+4. **Workflow Automation** - Triggers appropriate workflow (commit/review/rebase)
+5. **Interactive Chat** - Provides real-time chat interface with git context
 
 ### Smart Configuration
 
@@ -264,14 +264,14 @@ Add `--verbose` to any command for detailed diagnostics:
 ```bash
 commit --verbose
 # Shows:
-# 🔍 Detected repository: /path/to/repo
-# 📁 Branch: main  
-# 📊 Status: Has changes
+# Detected repository: /path/to/repo
+# Branch: main  
+# Status: Has changes
 #    Modified: 3, Untracked: 1, Staged: 0
-# 🎭 Starting commit workflow...
-# 🎯 Using git-chat-assistant actor
-# 🔗 Connecting to 127.0.0.1:9000
-# ✅ Session started - Domain: actor-123, Chat: actor-456
+# Starting commit workflow...
+# Using git-chat-assistant actor
+# Connecting to 127.0.0.1:9000
+# Session started - Domain: actor-123, Chat: actor-456
 ```
 
 ## Examples
@@ -291,22 +291,22 @@ commit
 
 **Output:**
 ```
-📝 Commit Workflow
+Commit Workflow
 Analyze changes and create meaningful commits  
-📁 Repository: my-project (main)
-⚠️  2 files with changes
+Repository: my-project (main)
+2 files with changes
 
-🎭 Git Commit Assistant
-📁 my-project • 🌿 main • ⚠️  Changes pending
+Git Commit Assistant
+my-project • main • Changes pending
 
-🤖 Assistant: I'll analyze your repository changes and help create commits.
+Assistant: I'll analyze your repository changes and help create commits.
 
-🔧 git status
+[tool] git status
 
 I can see you have 2 modified files. Let me examine the changes:
 
-🔧 git diff src/app.ts
-🔧 git diff README.md
+[tool] git diff src/app.ts
+[tool] git diff README.md
 
 I can see two distinct changes:
 1. A new feature addition in src/app.ts
@@ -314,15 +314,15 @@ I can see two distinct changes:
 
 I'll create two separate commits:
 
-🔧 git add src/app.ts
-🔧 git commit -m "feat: add new feature functionality"
+[tool] git add src/app.ts
+[tool] git commit -m "feat: add new feature functionality"
 
-🔧 git add README.md  
-🔧 git commit -m "docs: update README with recent changes"
+[tool] git add README.md  
+[tool] git commit -m "docs: update README with recent changes"
 
-✅ Created 2 commits with clear, conventional messages!
+Created 2 commits with clear, conventional messages!
 
-💬 _
+Message: _
 ```
 
 ### Code Review Session
@@ -334,34 +334,34 @@ review
 
 **Output:**
 ```
-🔍 Code Review
+Code Review
 Review changes and provide feedback
-📁 Repository: my-project (feature-branch)  
-⚠️  5 files with changes
+Repository: my-project (feature-branch)  
+5 files with changes
 
-🤖 Assistant: I'll review your code changes for quality, security, and best practices.
+Assistant: I'll review your code changes for quality, security, and best practices.
 
-🔧 git diff --staged
+[tool] git diff --staged
 
 Reviewing your changes:
 
-✅ **Positive aspects:**
+**Positive aspects:**
 - Good separation of concerns in auth.ts
 - Comprehensive error handling  
 - Clear variable naming
 
-⚠️ **Suggestions:**
+**Suggestions:**
 - Consider adding input validation in user.service.ts:42
 - The password hashing could be more secure (use argon2 instead of bcrypt)
 - Missing unit tests for the new authentication flow
 
-🔧 git diff src/auth.ts
+[tool] git diff src/auth.ts
 
 **Security note:** Line 15 has a potential timing attack vulnerability. Consider using constant-time comparison.
 
 Would you like me to show you how to fix these issues?
 
-💬 _
+Message: _
 ```
 
 ## License
@@ -384,4 +384,4 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**Git Theater** - Making git workflows intelligent and effortless! 🎭✨
+**Git Theater** - Making git workflows intelligent and effortless!

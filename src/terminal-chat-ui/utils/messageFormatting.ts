@@ -10,16 +10,16 @@ import type { Message, UIVariant } from '../types/common.js';
 export function getMessagePrefixes(variant: UIVariant = 'default') {
   const base = {
     user: '👤 You: ',
-    assistant: '🤖 Assistant: ',
+    assistant: 'Assistant: ',
     system: 'ℹ️  system: ',
-    tool: '🔧 '
+    tool: '[tool] '
   };
 
   switch (variant) {
     case 'git':
-      return { ...base, system: 'ℹ️  git: ', assistant: '🤖 Git Assistant: ' };
+      return { ...base, system: '[git] ', assistant: 'Git Assistant: ' };
     case 'chat':
-      return { ...base, assistant: '🤖 Chat: ' };
+      return { ...base, assistant: 'Chat: ' };
     default:
       return base;
   }
@@ -75,7 +75,7 @@ export function formatMessageContent(content: string, maxLineLength?: number): s
  */
 export function extractToolInfo(content: string): { toolName?: string; toolArgs?: string[] } {
   // Simple tool detection - could be enhanced based on message format
-  const toolPattern = /🔧\s*(\w+)(?::\s*(.+))?/;
+  const toolPattern = /\[tool\]\s*(\w+)(?::\s*(.+))?/;
   const match = content.match(toolPattern);
   
   if (match) {

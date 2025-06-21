@@ -32,9 +32,9 @@ export function MessageComponent({
   const getDefaultPrefixes = (variant: string) => {
     const base = {
       user: '👤 You: ',
-      assistant: '🤖 Assistant: ',
+      assistant: 'Assistant: ',
       system: 'ℹ️  system: ',
-      tool: '🔧 '
+      tool: '[tool] '
     };
 
     // Customize based on variant
@@ -42,7 +42,7 @@ export function MessageComponent({
       case 'git':
         return { ...base, system: 'ℹ️  git: ' };
       case 'chat':
-        return { ...base, assistant: '🤖 Chat: ' };
+        return { ...base, assistant: 'Chat: ' };
       default:
         return base;
     }
