@@ -34,10 +34,10 @@ interface GitChatAppProps {
 const DEBUG_LOG_FILE = '/tmp/git-theater-debug.log';
 function debugLog(...args: any[]) {
   const timestamp = new Date().toISOString();
-  const message = `[${timestamp}] ${args.map(arg => 
+  const message = `[${timestamp}] ${args.map(arg =>
     typeof arg === 'string' ? arg : JSON.stringify(arg, null, 2)
   ).join(' ')}\n`;
-  
+
   try {
     fs.appendFileSync(DEBUG_LOG_FILE, message);
   } catch (error) {
@@ -94,19 +94,19 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
         channelStream.onMessage((message) => {
           try {
             const messageText = Buffer.from(message.data).toString('utf8');
-            
+
             // Log raw incoming message
             debugLog('\n🔍 [THEATER RAW]:', messageText);
-            
+
             const parsedMessage = JSON.parse(messageText);
-            
+
             // Log parsed message structure
             debugLog('📦 [THEATER PARSED]:', parsedMessage);
 
             if (parsedMessage.type === 'chat_message' && parsedMessage.message) {
               const messageEntry = parsedMessage?.message?.entry;
               const isUserMessage = messageEntry?.Message?.role === 'user';
-              
+
               debugLog('📝 [MESSAGE ENTRY]:', messageEntry);
               debugLog('🤖 [IS USER MESSAGE]:', isUserMessage);
 
@@ -114,20 +114,20 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
               if (!isUserMessage) {
                 const messageContent = messageEntry?.Message?.content || messageEntry?.Completion?.content;
                 const stopReason = messageEntry?.Message?.stop_reason || messageEntry?.Completion?.stop_reason;
-                
+
                 debugLog('💬 [MESSAGE CONTENT]:', messageContent);
                 debugLog('🛑 [STOP REASON]:', stopReason);
 
                 if (Array.isArray(messageContent)) {
                   let fullContent = '';
-                  let toolCalls: Array<{name: string, args: string[]}> = [];
+                  let toolCalls: Array<{ name: string, args: string[] }> = [];
 
                   debugLog('📦 [PROCESSING CONTENT BLOCKS]:', messageContent.length, 'blocks');
 
                   // Process all content blocks
                   for (const block of messageContent) {
                     debugLog('🧩 [CONTENT BLOCK]:', block);
-                    
+
                     if (block?.type === 'text' && block?.text) {
                       debugLog('📝 [TEXT BLOCK]:', block.text.substring(0, 100) + '...');
                       fullContent += block.text;
@@ -144,30 +144,31 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
                   debugLog('🔧 [TOOL CALLS TO ADD]:', toolCalls.length);
                   debugLog('📝 [FULL TEXT CONTENT]:', fullContent.substring(0, 200) + '...');
 
+
+                  // Then add the text content
+                  if (fullContent.trim()) {
+                    debugLog('➕ [UPDATING PENDING MESSAGE]:', fullContent.substring(0, 100) + '...');
+                    updateLastPendingMessage(fullContent);
+                  } else if (typeof messageContent === 'string') {
+                    //debugLog('📝 [STRING CONTENT]:', messageContent.substring(0, 100) + '...');
+                    updateLastPendingMessage(messageContent);
+                  }
+
                   // Add tool messages first (they execute before the text response)
                   for (const toolCall of toolCalls) {
                     debugLog('➕ [ADDING TOOL MESSAGE]:', toolCall.name, toolCall.args);
                     addToolMessage(toolCall.name, toolCall.args);
                   }
 
-                  // Then add the text content
-                  if (fullContent.trim()) {
-                    debugLog('➕ [UPDATING PENDING MESSAGE]:', fullContent.substring(0, 100) + '...');
-                    updateLastPendingMessage(fullContent);
+                  // If stop reason is not 'end_turn', add another pending message
+                  // as the assistant will continue after tool execution
+                  if (stopReason && stopReason !== 'end_turn') {
+                    debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
+                    addPendingMessage('assistant', '');
+                  } else {
+                    debugLog('✅ [COMPLETED] Stop reason:', stopReason, '- finishing generation');
+                    setIsGenerating(false);
                   }
-                } else if (typeof messageContent === 'string') {
-                  debugLog('📝 [STRING CONTENT]:', messageContent.substring(0, 100) + '...');
-                  updateLastPendingMessage(messageContent);
-                }
-
-                // If stop reason is not 'end_turn', add another pending message
-                // as the assistant will continue after tool execution
-                if (stopReason && stopReason !== 'end_turn') {
-                  debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
-                  addPendingMessage('assistant', '');
-                } else {
-                  debugLog('✅ [COMPLETED] Stop reason:', stopReason, '- finishing generation');
-                  setIsGenerating(false);
                 }
               }
             }
