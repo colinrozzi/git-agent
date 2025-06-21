@@ -139,8 +139,9 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
                 }
               } else {
                 // Add user message directly
-                console.log('User message received:', messageEntry?.Message?.content);
-                addMessage('user', messageEntry?.Message?.content?.text || '');
+                //console.log('User message received:', messageEntry?.Message?.content);
+                //console.log('User message text:', messageEntry?.Message?.content[0]?.text);
+                addMessage('user', messageEntry?.Message?.content[0]?.text || '');
               }
             }
           } catch (error) {
