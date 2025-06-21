@@ -3,7 +3,23 @@
  */
 
 import { useState, useCallback } from 'react';
+import fs from 'fs';
 import type { Message } from '../types/common.js';
+
+// Debug logging to file
+const DEBUG_LOG_FILE = '/tmp/git-theater-debug.log';
+function debugLog(...args: any[]) {
+  const timestamp = new Date().toISOString();
+  const message = `[${timestamp}] ${args.map(arg => 
+    typeof arg === 'string' ? arg : JSON.stringify(arg, null, 2)
+  ).join(' ')}\n`;
+  
+  try {
+    fs.appendFileSync(DEBUG_LOG_FILE, message);
+  } catch (error) {
+    // Ignore file write errors
+  }
+}
 
 /**
  * Hook for managing message state in Theater chat interfaces
@@ -37,14 +53,14 @@ export function useMessageState() {
 
   // Update the last pending message (useful for streaming responses)
   const updateLastPendingMessage = useCallback((content: string, status: Message['status'] = 'complete') => {
-    console.log('📝 [useMessageState] Updating pending message:', content.substring(0, 50) + '...', 'status:', status);
+    debugLog('📝 [useMessageState] Updating pending message:', content.substring(0, 50) + '...', 'status:', status);
     setMessages(prev => {
       const newMessages = [...prev];
       // Find the last pending message and update it
       for (let i = newMessages.length - 1; i >= 0; i--) {
         const message = newMessages[i];
         if (message && message.status === 'pending') {
-          console.log('🎯 [useMessageState] Found pending message at index:', i, 'updating content');
+          debugLog('🎯 [useMessageState] Found pending message at index:', i, 'updating content');
           newMessages[i] = {
             ...message,
             content,
@@ -59,10 +75,10 @@ export function useMessageState() {
 
   // Add a tool message (insert before the last pending assistant message)
   const addToolMessage = useCallback((toolName: string, toolArgs: string[] = []) => {
-    console.log('🔧 [useMessageState] Adding tool message:', toolName, toolArgs);
+    debugLog('🔧 [useMessageState] Adding tool message:', toolName, toolArgs);
     setMessages(prev => {
       const newMessages = [...prev];
-      console.log('📊 [useMessageState] Current messages before tool add:', newMessages.length);
+      debugLog('📊 [useMessageState] Current messages before tool add:', newMessages.length);
       
       const toolMessage: Message = {
         role: 'tool',
@@ -79,14 +95,14 @@ export function useMessageState() {
         const message = newMessages[i];
         if (message.role === 'assistant' && message.status === 'pending') {
           insertIndex = i;
-          console.log('🎯 [useMessageState] Found pending assistant at index:', i, '- inserting tool before it');
+          debugLog('🎯 [useMessageState] Found pending assistant at index:', i, '- inserting tool before it');
           break;
         }
       }
       
-      console.log('📋 [useMessageState] Inserting tool message at index:', insertIndex);
+      debugLog('📋 [useMessageState] Inserting tool message at index:', insertIndex);
       newMessages.splice(insertIndex, 0, toolMessage);
-      console.log('📊 [useMessageState] Messages after tool add:', newMessages.length);
+      debugLog('📊 [useMessageState] Messages after tool add:', newMessages.length);
       return newMessages;
     });
   }, []);
