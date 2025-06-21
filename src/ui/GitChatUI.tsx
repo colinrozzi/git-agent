@@ -1,14 +1,25 @@
 /**
- * Git-focused chat UI component
+ * Git-focused chat UI component using terminal-chat-ui
  */
 
-import { render, Box, Text, useInput, useApp } from 'ink';
+import { render, Box, Text } from 'ink';
 import Spinner from 'ink-spinner';
 import { useState, useEffect, useCallback } from 'react';
-import type { Message, SetupStatus, ToolDisplayMode, GitRepository, GitWorkflow, ChatSession } from '../types.js';
+import {
+  MessageComponent,
+  StatusHeader,
+  SmartInput,
+  HelpPanel,
+  useMessageState,
+  useKeyboardShortcuts,
+  commonShortcuts,
+  type ToolDisplayMode,
+  type SetupStatus
+} from '../terminal-chat-ui/index.js';
+
+import type { GitRepository, GitWorkflow, ChatSession } from '../types.js';
 import type { GitTheaterClient } from '../theater-client.js';
 import type { ChannelStream } from 'theater-client';
-import { MultiLineInput } from './MultiLineInput.js';
 
 interface GitChatAppProps {
   client: GitTheaterClient;
@@ -17,23 +28,10 @@ interface GitChatAppProps {
   workflow: GitWorkflow;
 }
 
-interface GitHeaderProps {
-  repository: GitRepository;
-  workflow: GitWorkflow;
-  setupStatus: SetupStatus;
-  setupMessage: string;
-}
-
-interface MessageComponentProps {
-  message: Message;
-  toolDisplayMode: ToolDisplayMode;
-}
-
 /**
- * Main Git Chat application
+ * Main Git Chat application using terminal-chat-ui components
  */
 function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [channel, setChannel] = useState<ChannelStream | null>(null);
   const [setupStatus, setSetupStatus] = useState<SetupStatus>('connecting');
@@ -41,53 +39,17 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
   const [toolDisplayMode, setToolDisplayMode] = useState<ToolDisplayMode>('minimal');
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
-  const { exit } = useApp();
+  // Use terminal-chat-ui message state management
+  const {
+    messages,
+    addMessage,
+    addPendingMessage,
+    updateLastPendingMessage,
+    addToolMessage,
+    clearMessages
+  } = useMessageState();
 
-  // Setup steps moved inline to avoid dependency issues
-
-  // Add message helper
-  const addMessage = useCallback((role: Message['role'], content: string, status: Message['status'] = 'complete', toolName?: string, toolArgs?: string[]) => {
-    const newMessage: Message = {
-      role,
-      content,
-      timestamp: new Date(),
-      status,
-      ...(toolName && { toolName }),
-      ...(toolArgs && { toolArgs })
-    };
-    setMessages(prev => [...prev, newMessage]);
-  }, []);
-
-  // Add pending message helper
-  const addPendingMessage = useCallback((role: Message['role'], content: string) => {
-    addMessage(role, content, 'pending');
-  }, [addMessage]);
-
-  // Tool message handler
-  const addToolMessage = useCallback((toolName: string, args: any[]) => {
-    setMessages(prev => {
-      const newMessages = [...prev];
-      const toolMessage: Message = {
-        role: 'tool',
-        content: '',
-        timestamp: new Date(),
-        status: 'complete',
-        toolName,
-        toolArgs: args
-      };
-
-      // Insert tool message before last assistant message
-      const lastAssistantIndex = newMessages.map(m => m.role).lastIndexOf('assistant');
-      if (lastAssistantIndex !== -1) {
-        newMessages.splice(lastAssistantIndex, 0, toolMessage);
-        return newMessages;
-      } else {
-        return [...prev, toolMessage];
-      }
-    });
-  }, []);
-
-  // Setup channel communication - FIXED: stable dependencies only
+  // Setup channel communication
   useEffect(() => {
     async function setupChannel() {
       try {
@@ -125,78 +87,26 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
                     if (block?.type === 'text' && block?.text) {
                       fullContent += block.text;
                     } else if (block?.type === 'tool_use') {
-                      // Handle tool messages directly - no callback dependency
-                      setMessages(prev => {
-                        const newMessages = [...prev];
-                        const toolMessage: Message = {
-                          role: 'tool',
-                          content: '',
-                          timestamp: new Date(),
-                          status: 'complete',
-                          toolName: block?.name || 'unknown',
-                          toolArgs: block?.input ? Object.values(block.input) : []
-                        };
-
-                        // Insert tool message before last assistant message
-                        const lastAssistantIndex = newMessages.map(m => m.role).lastIndexOf('assistant');
-                        if (lastAssistantIndex !== -1) {
-                          newMessages.splice(lastAssistantIndex, 0, toolMessage);
-                          return newMessages;
-                        } else {
-                          return [...prev, toolMessage];
-                        }
-                      });
+                      // Handle tool messages using terminal-chat-ui
+                      addToolMessage(
+                        block?.name || 'unknown',
+                        block?.input ? Object.values(block.input) : []
+                      );
                     }
                   }
 
                   if (fullContent.trim()) {
-                    setMessages(prev => {
-                      const newMessages = [...prev];
-                      // Update last pending assistant message
-                      for (let i = newMessages.length - 1; i >= 0; i--) {
-                        const message = newMessages[i];
-                        if (message && message.role === 'assistant' && message.status === 'pending') {
-                          newMessages[i] = {
-                            ...message,
-                            content: fullContent,
-                            status: 'complete' as const
-                          };
-                          break;
-                        }
-                      }
-                      return newMessages;
-                    });
+                    updateLastPendingMessage(fullContent);
                   }
                 } else if (typeof messageContent === 'string') {
-                  setMessages(prev => {
-                    const newMessages = [...prev];
-                    // Update last pending assistant message
-                    for (let i = newMessages.length - 1; i >= 0; i--) {
-                      const message = newMessages[i];
-                      if (message && message.role === 'assistant' && message.status === 'pending') {
-                        newMessages[i] = {
-                          ...message,
-                          content: messageContent,
-                          status: 'complete' as const
-                        };
-                        break;
-                      }
-                    }
-                    return newMessages;
-                  });
+                  updateLastPendingMessage(messageContent);
                 }
 
                 setIsGenerating(false);
               }
             }
           } catch (error) {
-            // Handle errors directly - no callback dependency
-            setMessages(prev => [...prev, {
-              role: 'system',
-              content: `Error: ${error instanceof Error ? error.message : String(error)}`,
-              timestamp: new Date(),
-              status: 'complete'
-            }]);
+            addMessage('system', `Error: ${error instanceof Error ? error.message : String(error)}`);
             setIsGenerating(false);
           }
         });
@@ -217,7 +127,7 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
     }
 
     setupChannel();
-  }, [client, session, workflow]); // FIXED: Only stable dependencies
+  }, [client, session, workflow, addMessage, addToolMessage, updateLastPendingMessage]);
 
   // Send message function
   const sendMessage = useCallback(async (messageText: string) => {
@@ -226,8 +136,8 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
     try {
       setIsGenerating(true);
 
-      // Add user message as pending
-      addPendingMessage('user', messageText.trim());
+      // Add user message
+      addMessage('user', messageText.trim());
 
       // Add pending assistant message
       addPendingMessage('assistant', '');
@@ -237,29 +147,27 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      addMessage('system', `Error sending message: ${errorMessage}`, 'complete');
+      addMessage('system', `Error sending message: ${errorMessage}`);
       setIsGenerating(false);
     }
-  }, [channel, client, session, addPendingMessage, addMessage]);
+  }, [channel, client, session, addMessage, addPendingMessage]);
 
-  // Keyboard shortcuts
-  useInput((input: string, key: any) => {
-    if (key.ctrl && input.toLowerCase() === 'c') {
-      exit();
-      return;
-    } else if (key.ctrl && input.toLowerCase() === 'l') {
-      setMessages([]);
-      return;
-    } else if (key.ctrl && input.toLowerCase() === 't') {
-      setToolDisplayMode(prev =>
-        prev === 'hidden' ? 'minimal' :
-          prev === 'minimal' ? 'full' : 'hidden'
-      );
-      return;
-    } else if (key.ctrl && input.toLowerCase() === 'h') {
-      setShowHelp(prev => !prev);
-      return;
-    }
+  // Use terminal-chat-ui keyboard shortcuts
+  useKeyboardShortcuts({
+    shortcuts: [
+      commonShortcuts.exit(() => process.exit(0)),
+      commonShortcuts.clear(clearMessages),
+      commonShortcuts.toggleHelp(() => setShowHelp(!showHelp)),
+      {
+        key: 't',
+        ctrl: true,
+        description: 'Toggle tool display',
+        action: () => setToolDisplayMode(prev =>
+          prev === 'hidden' ? 'minimal' :
+            prev === 'minimal' ? 'full' : 'hidden'
+        )
+      }
+    ]
   });
 
   // Cleanup on unmount
@@ -275,36 +183,59 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
     };
   }, [channel]);
 
+  // Create git-specific header content
+  const workflowTitle = workflow.charAt(0).toUpperCase() + workflow.slice(1);
+  const repoName = repository.path.split('/').pop() || 'Repository';
+  const title = `🎭 Git ${workflowTitle} Assistant`;
+  const subtitle = `📁 ${repoName} • 🌿 ${repository.currentBranch}${repository.hasUncommittedChanges ? ' • ⚠️ Changes pending' : ''}`;
+
   return (
     <Box flexDirection="column" height="100%">
-      <GitHeader 
-        repository={repository} 
-        workflow={workflow} 
-        setupStatus={setupStatus} 
-        setupMessage={setupMessage} 
+      <StatusHeader
+        title={title}
+        subtitle={subtitle}
+        setupStatus={setupStatus}
+        setupMessage={setupMessage}
+        variant="git"
       />
 
       {showHelp && (
-        <Box borderStyle="round" borderColor="blue" padding={1} marginBottom={1}>
-          <Text color="cyan">
-            💡 Shortcuts: Ctrl+C (exit), Ctrl+L (clear), Ctrl+T (tool display), Ctrl+H (toggle help)
-          </Text>
-        </Box>
+        <HelpPanel
+          shortcuts={[
+            { key: 'Ctrl+C', description: 'Exit' },
+            { key: 'Ctrl+L', description: 'Clear messages' },
+            { key: 'Ctrl+T', description: 'Toggle tool display' },
+            { key: 'Ctrl+H', description: 'Toggle help' }
+          ]}
+          variant="git"
+        />
       )}
 
       {setupStatus !== 'ready' ? (
         <Box flexDirection="column" flexGrow={1} paddingLeft={1} paddingRight={1}>
+          {/* StatusHeader shows the setup status, so we don't need extra content here */}
         </Box>
       ) : (
         <>
           <Box flexDirection="column" flexGrow={1} paddingLeft={1} paddingRight={1}>
             {messages.length === 0 ? (
               <Text color="gray" dimColor>
-                ℹ️  git: Ready for {workflow} workflow. Type your questions or let me analyze the repository.
+                ℹ️ git: Ready for {workflow} workflow. Type your questions or let me analyze the repository.
               </Text>
             ) : (
               messages.map((message, index) => (
-                <MessageComponent key={index} message={message} toolDisplayMode={toolDisplayMode} />
+                <MessageComponent
+                  key={index}
+                  message={message}
+                  toolDisplayMode={toolDisplayMode}
+                  variant="git"
+                  prefixOverrides={{
+                    user: '👤 You: ',
+                    assistant: '🤖 Assistant: ',
+                    system: 'ℹ️ git: ',
+                    tool: '🔧 '
+                  }}
+                />
               ))
             )}
 
@@ -317,131 +248,16 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
           </Box>
 
           <Box paddingLeft={1} paddingRight={1} paddingBottom={1}>
-            <MultiLineInput
+            <SmartInput
               placeholder={isGenerating ? "Processing..." : "💬 "}
               onSubmit={sendMessage}
               disabled={isGenerating}
+              mode="auto"
+              autoMultilineThreshold={50}
             />
           </Box>
         </>
       )}
-    </Box>
-  );
-}
-
-/**
- * Git-specific header component
- */
-function GitHeader({ repository, workflow, setupStatus, setupMessage }: GitHeaderProps) {
-  const workflowTitle = workflow.charAt(0).toUpperCase() + workflow.slice(1);
-  const repoName = repository.path.split('/').pop() || 'Repository';
-
-  // Show minimal header when ready
-  if (setupStatus === 'ready') {
-    return (
-      <Box flexDirection="column" marginBottom={1} paddingLeft={1}>
-        <Box>
-          <Text color="cyan">🎭 Git {workflowTitle} Assistant</Text>
-        </Box>
-        <Box>
-          <Text color="gray">📁 {repoName}</Text>
-          <Text color="gray"> • </Text>
-          <Text color="gray">🌿 {repository.currentBranch}</Text>
-          {repository.hasUncommittedChanges && (
-            <>
-              <Text color="gray"> • </Text>
-              <Text color="yellow">⚠️  Changes pending</Text>
-            </>
-          )}
-        </Box>
-      </Box>
-    );
-  }
-
-  // Show loading state
-  return (
-    <Box flexDirection="column" marginBottom={1} paddingLeft={1}>
-      <Box>
-        <Text color="cyan">🎭 Git {workflowTitle} Assistant</Text>
-      </Box>
-      <Box>
-        <Text color="gray">📁 {repoName} • 🌿 {repository.currentBranch}</Text>
-      </Box>
-      <Box>
-        <Spinner type="dots" />
-        <Text color="yellow"> {setupMessage}</Text>
-      </Box>
-    </Box>
-  );
-}
-
-/**
- * Message component
- */
-function MessageComponent({ message, toolDisplayMode }: MessageComponentProps) {
-  const { role, content, status, toolName, toolArgs } = message;
-
-  if (role === 'tool' && toolDisplayMode === 'hidden') {
-    return null;
-  }
-
-  // Skip empty system messages
-  if (role === 'system' && !content.trim()) {
-    return null;
-  }
-
-  const contentColor = {
-    user: 'gray',
-    assistant: 'white',
-    system: 'gray',
-    tool: 'magenta'
-  }[role] || 'white';
-
-  const prefix = {
-    user: '👤 You: ',
-    assistant: '🤖 Assistant: ',
-    system: 'ℹ️  git: ',
-    tool: '🔧 '
-  }[role] || '';
-
-  // Handle tool messages
-  if (role === 'tool') {
-    if (toolDisplayMode === 'minimal') {
-      const args = toolArgs ? toolArgs.join(' ') : '';
-      return (
-        <Box marginBottom={1}>
-          <Text color="magenta" dimColor>
-            {prefix}{toolName}: {args}
-          </Text>
-        </Box>
-      );
-    } else if (toolDisplayMode === 'full') {
-      const args = toolArgs ? toolArgs.join(' ') : '';
-      return (
-        <Box flexDirection="column" marginBottom={1}>
-          <Text color="magenta">
-            {prefix}{toolName}
-          </Text>
-          <Text color="magenta" dimColor>
-            Args: {args}
-          </Text>
-        </Box>
-      );
-    }
-    return null;
-  }
-
-  // Handle regular messages
-  const lines = content.split('\n');
-  const hasMultipleLines = lines.length > 1;
-
-  return (
-    <Box flexDirection="column" marginBottom={1}>
-      {lines.map((line, index) => (
-        <Text key={index} color={contentColor}>
-          {index === 0 ? prefix : hasMultipleLines ? '   ' : ''}{line || ' '}
-        </Text>
-      ))}
     </Box>
   );
 }

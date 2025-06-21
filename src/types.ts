@@ -2,6 +2,15 @@
  * Type definitions for git-theater
  */
 
+// Re-export shared types from terminal-chat-ui
+export type {
+  Message,
+  SetupStatus,
+  ToolDisplayMode,
+  ChatSession
+} from './terminal-chat-ui/index.js';
+
+// Git-theater specific types
 export type GitWorkflow = 'commit' | 'review' | 'rebase' | 'chat';
 
 export interface GitTheaterConfig {
@@ -34,27 +43,9 @@ export interface GitRepository {
   stagedFiles: string[];
 }
 
-export interface Message {
-  role: 'user' | 'assistant' | 'system' | 'tool';
-  content: string;
-  timestamp: Date;
-  status: 'pending' | 'complete';
-  toolName?: string;
-  toolArgs?: string[];
-}
-
-export type SetupStatus = 'connecting' | 'opening_channel' | 'loading_actor' | 'ready' | 'error';
-
-export type ToolDisplayMode = 'hidden' | 'minimal' | 'full';
-
 export interface CLIOptions {
   directory?: string;
   server?: string;
   verbose?: boolean;
   help?: boolean;
-}
-
-export interface ChatSession {
-  domainActor: any; // Actor from theater-client
-  chatActorId: string;
 }
