@@ -105,12 +105,9 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
 
                 // If stop reason is not 'end_turn', add another pending message
                 // as the assistant will continue after tool execution
-                console.log('DEBUG: Stop reason:', stopReason);
                 if (stopReason && stopReason !== 'end_turn') {
-                  console.log('DEBUG: Adding pending message for continuation');
                   addPendingMessage('assistant', '');
                 } else {
-                  console.log('DEBUG: Setting generating to false');
                   setIsGenerating(false);
                 }
               }
