@@ -152,7 +152,10 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
         setChannel(channelStream);
 
         // Start git workflow
-        setIsGenerating(true);
+        //setIsGenerating(true);
+        if (mode === 'workflow') {
+          setIsGenerating(true);
+        }
         await client.startGitWorkflow(session.domainActor);
 
         setSetupStatus('ready');
@@ -175,10 +178,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
     try {
       setIsGenerating(true);
 
-      // Add user message
-      addMessage('user', messageText.trim());
-
-      // Send message through domain actor
+      // Send message through domain actor (user message will be added via channel stream)
       await client.sendMessage(session.domainActor, messageText.trim());
 
     } catch (error) {
