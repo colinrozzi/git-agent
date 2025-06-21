@@ -83,19 +83,27 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
 
                 if (Array.isArray(messageContent)) {
                   let fullContent = '';
+                  let toolCalls: Array<{name: string, args: string[]}> = [];
 
+                  // Process all content blocks
                   for (const block of messageContent) {
                     if (block?.type === 'text' && block?.text) {
                       fullContent += block.text;
                     } else if (block?.type === 'tool_use') {
-                      // Handle tool messages using terminal-chat-ui
-                      addToolMessage(
-                        block?.name || 'unknown',
-                        block?.input ? Object.values(block.input) : []
-                      );
+                      // Collect tool calls to add before the text
+                      toolCalls.push({
+                        name: block?.name || 'unknown',
+                        args: block?.input ? Object.values(block.input) : []
+                      });
                     }
                   }
 
+                  // Add tool messages first (they execute before the text response)
+                  for (const toolCall of toolCalls) {
+                    addToolMessage(toolCall.name, toolCall.args);
+                  }
+
+                  // Then add the text content
                   if (fullContent.trim()) {
                     updateLastPendingMessage(fullContent);
                   }
