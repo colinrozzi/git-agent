@@ -285,8 +285,8 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
                     toolDisplayMode={toolDisplayMode}
                     variant="git"
                     prefixOverrides={{
-                      user: 'You: ',
-                      assistant: 'Assistant: ',
+                      user: '',
+                      assistant: '',
                       system: '[git] ',
                       tool: '[tool] '
                     }}

@@ -31,8 +31,8 @@ export function MessageComponent({
   // Default prefixes based on variant
   const getDefaultPrefixes = (variant: string) => {
     const base = {
-      user: '',
-      assistant: '',
+      user: 'You: ',
+      assistant: 'Assistant: ',
       system: '[system] ',
       tool: '[tool] '
     };
