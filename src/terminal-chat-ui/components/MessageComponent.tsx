@@ -86,7 +86,7 @@ export function MessageComponent({
   const prefix = prefixes[role] || '';
 
   return (
-    <Box flexDirection="column" marginBottom={1}>
+    <Box flexDirection="column">
       {/* Message content */}
       {lines.map((line, index) => (
         <Text key={index} color={roleColor}>
