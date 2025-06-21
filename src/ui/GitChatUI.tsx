@@ -70,26 +70,45 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
         channelStream.onMessage((message) => {
           try {
             const messageText = Buffer.from(message.data).toString('utf8');
+            
+            // Log raw incoming message
+            console.log('\n🔍 [THEATER RAW]:', messageText);
+            
             const parsedMessage = JSON.parse(messageText);
+            
+            // Log parsed message structure
+            console.log('📦 [THEATER PARSED]:', JSON.stringify(parsedMessage, null, 2));
 
             if (parsedMessage.type === 'chat_message' && parsedMessage.message) {
               const messageEntry = parsedMessage?.message?.entry;
               const isUserMessage = messageEntry?.Message?.role === 'user';
+              
+              console.log('📝 [MESSAGE ENTRY]:', JSON.stringify(messageEntry, null, 2));
+              console.log('🤖 [IS USER MESSAGE]:', isUserMessage);
 
               // Only show assistant messages
               if (!isUserMessage) {
                 const messageContent = messageEntry?.Message?.content || messageEntry?.Completion?.content;
                 const stopReason = messageEntry?.Message?.stop_reason || messageEntry?.Completion?.stop_reason;
+                
+                console.log('💬 [MESSAGE CONTENT]:', JSON.stringify(messageContent, null, 2));
+                console.log('🛑 [STOP REASON]:', stopReason);
 
                 if (Array.isArray(messageContent)) {
                   let fullContent = '';
                   let toolCalls: Array<{name: string, args: string[]}> = [];
 
+                  console.log('📦 [PROCESSING CONTENT BLOCKS]:', messageContent.length, 'blocks');
+
                   // Process all content blocks
                   for (const block of messageContent) {
+                    console.log('🧩 [CONTENT BLOCK]:', JSON.stringify(block, null, 2));
+                    
                     if (block?.type === 'text' && block?.text) {
+                      console.log('📝 [TEXT BLOCK]:', block.text.substring(0, 100) + '...');
                       fullContent += block.text;
                     } else if (block?.type === 'tool_use') {
+                      console.log('🔧 [TOOL BLOCK]:', block.name, 'with input:', block.input);
                       // Collect tool calls to add before the text
                       toolCalls.push({
                         name: block?.name || 'unknown',
@@ -98,24 +117,32 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
                     }
                   }
 
+                  console.log('🔧 [TOOL CALLS TO ADD]:', toolCalls.length);
+                  console.log('📝 [FULL TEXT CONTENT]:', fullContent.substring(0, 200) + '...');
+
                   // Add tool messages first (they execute before the text response)
                   for (const toolCall of toolCalls) {
+                    console.log('➕ [ADDING TOOL MESSAGE]:', toolCall.name, toolCall.args);
                     addToolMessage(toolCall.name, toolCall.args);
                   }
 
                   // Then add the text content
                   if (fullContent.trim()) {
+                    console.log('➕ [UPDATING PENDING MESSAGE]:', fullContent.substring(0, 100) + '...');
                     updateLastPendingMessage(fullContent);
                   }
                 } else if (typeof messageContent === 'string') {
+                  console.log('📝 [STRING CONTENT]:', messageContent.substring(0, 100) + '...');
                   updateLastPendingMessage(messageContent);
                 }
 
                 // If stop reason is not 'end_turn', add another pending message
                 // as the assistant will continue after tool execution
                 if (stopReason && stopReason !== 'end_turn') {
+                  console.log('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
                   addPendingMessage('assistant', '');
                 } else {
+                  console.log('✅ [COMPLETED] Stop reason:', stopReason, '- finishing generation');
                   setIsGenerating(false);
                 }
               }
