@@ -8,7 +8,6 @@
 // Export all components
 export {
   MessageComponent,
-  StatusHeader,
   SimpleInput,
   MultiLineInput,
   SmartInput,

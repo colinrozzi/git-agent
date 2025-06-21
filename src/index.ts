@@ -22,7 +22,7 @@ import type { GitWorkflow, CLIOptions } from './types.js';
 // Determine the workflow from the command name
 function getWorkflowFromCommand(): GitWorkflow {
   const scriptName = path.basename(process.argv[1]);
-  
+
   switch (scriptName) {
     case 'commit':
       return 'commit';
@@ -119,6 +119,7 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
       process.exit(1);
     }
 
+    /*
     validateGitRepository(repoPath);
     const repository = analyzeRepository(repoPath);
 
@@ -132,6 +133,7 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
         console.log(chalk.gray(`   Staged: ${repository.stagedFiles.length}`));
       }
     }
+    */
 
     // Build configuration
     const config = buildGitConfig(workflow, repoPath);
@@ -151,19 +153,19 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
     }
 
     // Show workflow banner
-    showWorkflowBanner(workflow, repository);
+    //showWorkflowBanner(workflow, repository);
 
     // Start the interactive UI
-    await renderGitChatApp(client, session, repository, workflow);
+    await renderGitChatApp(client, session, repoPath, workflow);
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(chalk.red(`❌ Error: ${errorMessage}`));
-    
+
     if (options.verbose && error instanceof Error && error.stack) {
       console.error(chalk.gray(error.stack));
     }
-    
+
     process.exit(1);
   } finally {
     // Cleanup
@@ -188,13 +190,13 @@ function showWorkflowBanner(workflow: GitWorkflow, repository: any): void {
       description: 'Analyze changes and create meaningful commits'
     },
     review: {
-      emoji: '', 
+      emoji: '',
       title: 'Code Review',
       description: 'Review changes and provide feedback'
     },
     rebase: {
       emoji: '🔄',
-      title: 'Interactive Rebase', 
+      title: 'Interactive Rebase',
       description: 'Clean up commit history'
     },
     chat: {
@@ -210,12 +212,12 @@ function showWorkflowBanner(workflow: GitWorkflow, repository: any): void {
   console.log(chalk.cyan(`\n${info.emoji} ${info.title}`));
   console.log(chalk.gray(`${info.description}`));
   console.log(chalk.gray(`Repository: ${repoName} (${repository.currentBranch})`));
-  
+
   if (repository.hasUncommittedChanges) {
     console.log(chalk.yellow(`${repository.modifiedFiles.length + repository.untrackedFiles.length + repository.stagedFiles.length} files with changes`));
   } else {
     console.log(chalk.green(`Working directory clean`));
   }
-  
+
   console.log(''); // Empty line before UI starts
 }

@@ -9,7 +9,6 @@ import fs from 'fs';
 import path from 'path';
 import {
   MessageComponent,
-  StatusHeader,
   SmartInput,
   HelpPanel,
   useMessageState,
@@ -26,7 +25,7 @@ import type { ChannelStream } from 'theater-client';
 interface GitChatAppProps {
   client: GitTheaterClient;
   session: ChatSession;
-  repository: GitRepository;
+  repoPath: string;
   workflow: GitWorkflow;
 }
 
@@ -55,7 +54,7 @@ try {
 /**
  * Main Git Chat application using terminal-chat-ui components
  */
-function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) {
+function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [channel, setChannel] = useState<ChannelStream | null>(null);
   const [setupStatus, setSetupStatus] = useState<SetupStatus>('connecting');
@@ -254,20 +253,11 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
 
   // Create git-specific header content
   const workflowTitle = workflow.charAt(0).toUpperCase() + workflow.slice(1);
-  const repoName = repository.path.split('/').pop() || 'Repository';
+  const repoName = repoPath.split('/').pop() || 'Repository';
   const title = `Git ${workflowTitle} Assistant`;
-  const subtitle = `${repoName} • ${repository.currentBranch}${repository.hasUncommittedChanges ? ' • Changes pending' : ''}`;
 
   return (
     <Box flexDirection="column" height="100%">
-      <StatusHeader
-        title={title}
-        subtitle={subtitle}
-        setupStatus={setupStatus}
-        setupMessage={setupMessage}
-        variant="git"
-      />
-
       {showHelp && (
         <HelpPanel
           shortcuts={[
@@ -337,7 +327,7 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
 export async function renderGitChatApp(
   client: GitTheaterClient,
   session: ChatSession,
-  repository: GitRepository,
+  repoPath: string,
   workflow: GitWorkflow
 ): Promise<void> {
   let app: any = null;
@@ -366,7 +356,7 @@ export async function renderGitChatApp(
       <GitChatApp
         client={client}
         session={session}
-        repository={repository}
+        repoPath={repoPath}
         workflow={workflow}
       />
     );
