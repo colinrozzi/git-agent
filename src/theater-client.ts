@@ -20,7 +20,7 @@ export class GitTheaterClient {
       host || '127.0.0.1',
       parseInt(port || '9000') || 9000,
       {
-        timeout: 300000, // 5 minutes for chat UI
+        timeout: 0, // No timeout for interactive chat sessions
         retryAttempts: 3,
         retryDelay: 1000
       }
