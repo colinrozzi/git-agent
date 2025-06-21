@@ -83,7 +83,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
       try {
         setSetupStatus('connecting');
         setSetupMessage('Connecting to Theater...');
-        await new Promise(resolve => setTimeout(resolve, 500));
+        //await new Promise(resolve => setTimeout(resolve, 500));
 
         setSetupStatus('opening_channel');
         setSetupMessage('Opening communication channel...');
@@ -92,7 +92,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
 
         setSetupStatus('loading_actor');
         setSetupMessage(`Starting ${workflow} workflow...`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        //await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Set up simplified message handler
         channelStream.onMessage((message) => {
@@ -137,6 +137,10 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
                 if (stopReason === 'end_turn') {
                   setIsGenerating(false);
                 }
+              } else {
+                // Add user message directly
+                console.log('User message received:', messageEntry?.Message?.content);
+                addMessage('user', messageEntry?.Message?.content.text || '');
               }
             }
           } catch (error) {
