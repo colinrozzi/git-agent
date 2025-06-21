@@ -14,7 +14,7 @@ export class GitTheaterClient {
     } else {
       setLogLevel('error');
     }
-    
+
     const [host, port] = serverAddress.split(':');
     this.client = new TheaterClient(
       host || '127.0.0.1',
@@ -49,9 +49,6 @@ export class GitTheaterClient {
     }
 
     const chatActorId = chatStateResponse.actor_id;
-
-    // Give the chat actor a moment to initialize
-    await new Promise(resolve => setTimeout(resolve, 500));
 
     return {
       domainActor,
