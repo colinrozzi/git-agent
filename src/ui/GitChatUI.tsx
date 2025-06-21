@@ -79,6 +79,7 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
               // Only show assistant messages
               if (!isUserMessage) {
                 const messageContent = messageEntry?.Message?.content || messageEntry?.Completion?.content;
+                const stopReason = messageEntry?.Message?.stop_reason || messageEntry?.Completion?.stop_reason;
 
                 if (Array.isArray(messageContent)) {
                   let fullContent = '';
@@ -102,7 +103,16 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
                   updateLastPendingMessage(messageContent);
                 }
 
-                setIsGenerating(false);
+                // If stop reason is not 'end_turn', add another pending message
+                // as the assistant will continue after tool execution
+                console.log('DEBUG: Stop reason:', stopReason);
+                if (stopReason && stopReason !== 'end_turn') {
+                  console.log('DEBUG: Adding pending message for continuation');
+                  addPendingMessage('assistant', '');
+                } else {
+                  console.log('DEBUG: Setting generating to false');
+                  setIsGenerating(false);
+                }
               }
             }
           } catch (error) {
