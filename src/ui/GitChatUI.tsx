@@ -160,15 +160,16 @@ function GitChatApp({ client, session, repository, workflow }: GitChatAppProps) 
                     addToolMessage(toolCall.name, toolCall.args);
                   }
 
-                  // If stop reason is not 'end_turn', add another pending message
-                  // as the assistant will continue after tool execution
-                  if (stopReason && stopReason !== 'end_turn') {
-                    debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
-                    addPendingMessage('assistant', '');
-                  } else {
-                    debugLog('✅ [COMPLETED] Stop reason:', stopReason, '- finishing generation');
-                    setIsGenerating(false);
-                  }
+                }
+
+                // If stop reason is not 'end_turn', add another pending message
+                // as the assistant will continue after tool execution
+                if (stopReason && stopReason !== 'end_turn') {
+                  debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
+                  addPendingMessage('assistant', '');
+                } else {
+                  debugLog('✅ [COMPLETED] Stop reason:', stopReason, '- finishing generation');
+                  setIsGenerating(false);
                 }
               }
             }
