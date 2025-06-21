@@ -140,7 +140,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
               } else {
                 // Add user message directly
                 //console.log('User message received:', messageEntry?.Message?.content);
-                addMessage('user', messageEntry?.Message?.content.text || '');
+                addMessage('user', messageEntry?.Message?.content?.text || '');
               }
             }
           } catch (error) {
