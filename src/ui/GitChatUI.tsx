@@ -146,6 +146,10 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
                   if (fullContent.trim()) {
                     debugLog('➕ [UPDATING PENDING MESSAGE WITH CONTENT]:', fullContent.substring(0, 100) + '...');
                     updateLastPendingMessage(fullContent);
+                    if (stopReason && stopReason !== 'end_turn') {
+                      debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
+                      addPendingMessage('assistant', '');
+                    }
                   }
 
                   for (const toolCall of toolCalls) {
@@ -155,21 +159,15 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
                 } else if (typeof messageContent === 'string' && messageContent.trim()) {
                   debugLog('📝 [UPDATING WITH STRING CONTENT]:', messageContent.substring(0, 100) + '...');
                   updateLastPendingMessage(messageContent);
+                  if (stopReason && stopReason !== 'end_turn') {
+                    debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
+                    addPendingMessage('assistant', '');
+                  }
                 }
 
                 // If stop reason is not 'end_turn' and there is not an existing pending message, add another pending message
                 // as the assistant will continue after tool execution
-                if (stopReason && stopReason !== 'end_turn') {
-                  debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
-                  // If there is no pending message, add a new one
-                  const hasPendingMessage = messages.some(m => m.role === 'assistant' && m.status === 'pending');
-                  debugLog('🔍 [HAS PENDING MESSAGE]:', hasPendingMessage);
-                  debugLog('messages', messages);
-                  if (!hasPendingMessage) {
-                    debugLog('➕ [ADDING NEW PENDING MESSAGE]');
-                    addPendingMessage('assistant', '');
-                  }
-                } else {
+                if (stopReason && stopReason == 'end_turn') {
                   debugLog('✅ [COMPLETED] Stop reason:', stopReason, '- finishing generation');
                   setIsGenerating(false);
                 }
