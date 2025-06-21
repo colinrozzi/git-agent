@@ -164,6 +164,7 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
                   // If there is no pending message, add a new one
                   const hasPendingMessage = messages.some(m => m.role === 'assistant' && m.status === 'pending');
                   debugLog('🔍 [HAS PENDING MESSAGE]:', hasPendingMessage);
+                  debugLog('messages', messages);
                   if (!hasPendingMessage) {
                     debugLog('➕ [ADDING NEW PENDING MESSAGE]');
                     addPendingMessage('assistant', '');
