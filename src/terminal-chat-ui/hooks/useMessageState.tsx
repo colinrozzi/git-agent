@@ -73,6 +73,11 @@ export function useMessageState() {
     });
   }, []);
 
+  // Update the last pending message content but keep it pending
+  const updateLastPendingMessageContent = useCallback((content: string) => {
+    updateLastPendingMessage(content, 'pending');
+  }, [updateLastPendingMessage]);
+
   // Add a tool message (insert before the last pending assistant message)
   const addToolMessage = useCallback((toolName: string, toolArgs: string[] = []) => {
     debugLog('🔧 [useMessageState] Adding tool message:', toolName, toolArgs);
@@ -122,6 +127,7 @@ export function useMessageState() {
     addMessage,
     addPendingMessage,
     updateLastPendingMessage,
+    updateLastPendingMessageContent,
     addToolMessage,
     clearMessages,
     removeMessage,

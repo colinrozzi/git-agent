@@ -68,6 +68,7 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
     addMessage,
     addPendingMessage,
     updateLastPendingMessage,
+    updateLastPendingMessageContent,
     addToolMessage,
     clearMessages
   } = useMessageState();
@@ -143,22 +144,22 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
                   debugLog('🔧 [TOOL CALLS TO ADD]:', toolCalls.length);
                   debugLog('📝 [FULL TEXT CONTENT]:', fullContent.substring(0, 200) + '...');
 
-
-                  // Then add the text content
-                  if (fullContent.trim()) {
-                    debugLog('➕ [UPDATING PENDING MESSAGE]:', fullContent.substring(0, 100) + '...');
-                    updateLastPendingMessage(fullContent);
-                  } else if (typeof messageContent === 'string') {
-                    //debugLog('📝 [STRING CONTENT]:', messageContent.substring(0, 100) + '...');
-                    updateLastPendingMessage(messageContent);
-                  }
-
                   // Add tool messages first (they execute before the text response)
                   for (const toolCall of toolCalls) {
                     debugLog('➕ [ADDING TOOL MESSAGE]:', toolCall.name, toolCall.args);
                     addToolMessage(toolCall.name, toolCall.args);
                   }
 
+                  // Then add the text content - only update if we have actual content
+                  if (fullContent.trim()) {
+                    debugLog('➕ [UPDATING PENDING MESSAGE WITH CONTENT]:', fullContent.substring(0, 100) + '...');
+                    updateLastPendingMessage(fullContent);
+                  }
+                  // Don't update the pending message if content is empty - leave it pending for the next response
+
+                } else if (typeof messageContent === 'string' && messageContent.trim()) {
+                  debugLog('📝 [UPDATING WITH STRING CONTENT]:', messageContent.substring(0, 100) + '...');
+                  updateLastPendingMessage(messageContent);
                 }
 
                 // If stop reason is not 'end_turn' and there is not an existing pending message, add another pending message
@@ -200,7 +201,7 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
     }
 
     setupChannel();
-  }, [client, session, workflow, addMessage, addToolMessage, updateLastPendingMessage, addPendingMessage]);
+  }, [client, session, workflow, addMessage, addToolMessage, updateLastPendingMessage, updateLastPendingMessageContent, addPendingMessage]);
 
   // Send message function
   const sendMessage = useCallback(async (messageText: string) => {
