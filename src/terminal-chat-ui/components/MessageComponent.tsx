@@ -1,13 +1,12 @@
 /**
- * Shared MessageComponent - unified from theater-chat and git-theater
+ * Simplified MessageComponent - no more pending state handling
  */
 
 import { Box, Text } from 'ink';
-import Spinner from 'ink-spinner';
 import type { MessageComponentProps } from '../types/ui.js';
 
 /**
- * Unified message component that works across different Theater chat interfaces
+ * Simplified message component - all messages are complete when rendered
  */
 export function MessageComponent({ 
   message, 
@@ -17,7 +16,7 @@ export function MessageComponent({
   contentColor,
   showTimestamp = false
 }: MessageComponentProps) {
-  const { role, content, status, toolName, toolArgs } = message;
+  const { role, content, toolName, toolArgs } = message;
 
   // Don't show hidden tool messages
   if (role === 'tool' && toolDisplayMode === 'hidden') {
@@ -76,21 +75,12 @@ export function MessageComponent({
     />;
   }
 
-  // Handle pending assistant messages with spinner
-  if (role === 'assistant' && status === 'pending') {
-    return <PendingAssistantMessage 
-      content={content}
-      prefix={prefixes.assistant}
-      color={roleColor}
-    />;
-  }
-
   // Skip empty assistant messages (when only tools were used)
   if (role === 'assistant' && !content.trim()) {
     return null;
   }
 
-  // Handle regular messages
+  // Handle regular messages - all are complete, no pending state
   const lines = content.split('\n');
   const hasMultipleLines = lines.length > 1;
   const prefix = prefixes[role] || '';
@@ -110,52 +100,6 @@ export function MessageComponent({
           {message.timestamp.toLocaleTimeString()}
         </Text>
       )}
-    </Box>
-  );
-}
-
-/**
- * Pending assistant message with spinner
- */
-interface PendingAssistantMessageProps {
-  content: string;
-  prefix: string;
-  color: string;
-}
-
-function PendingAssistantMessage({ content, prefix, color }: PendingAssistantMessageProps) {
-  // If there's content, show it with a typing indicator
-  if (content.trim()) {
-    const lines = content.split('\n');
-    const hasMultipleLines = lines.length > 1;
-
-    return (
-      <Box flexDirection="column" marginBottom={1}>
-        {/* Existing content */}
-        {lines.map((line, index) => (
-          <Text key={index} color={color}>
-            {index === 0 ? prefix : hasMultipleLines ? '   ' : ''}{line || ' '}
-          </Text>
-        ))}
-        
-        {/* Typing indicator on a new line */}
-        <Box>
-          <Text color="gray" dimColor>
-            {'   '}
-          </Text>
-          <Spinner type="dots" />
-          <Text color="gray" dimColor> typing...</Text>
-        </Box>
-      </Box>
-    );
-  }
-
-  // If no content yet, show just the spinner with prefix
-  return (
-    <Box marginBottom={1}>
-      <Text color={color}>{prefix}</Text>
-      <Spinner type="dots" />
-      <Text color="gray" dimColor> thinking...</Text>
     </Box>
   );
 }

@@ -1,12 +1,10 @@
 /**
- * Git-focused chat UI component using terminal-chat-ui
+ * Git-focused chat UI component - simplified version
  */
 
 import { render, Box, Text } from 'ink';
 import Spinner from 'ink-spinner';
 import { useState, useEffect, useCallback } from 'react';
-import fs from 'fs';
-import path from 'path';
 import {
   MessageComponent,
   SmartInput,
@@ -29,30 +27,21 @@ interface GitChatAppProps {
   workflow: GitWorkflow;
 }
 
-// Debug logging to file
-const DEBUG_LOG_FILE = '/tmp/git-theater-debug.log';
-function debugLog(...args: any[]) {
-  const timestamp = new Date().toISOString();
-  const message = `[${timestamp}] ${args.map(arg =>
-    typeof arg === 'string' ? arg : JSON.stringify(arg, null, 2)
-  ).join(' ')}\n`;
-
-  try {
-    fs.appendFileSync(DEBUG_LOG_FILE, message);
-  } catch (error) {
-    // Ignore file write errors
-  }
-}
-
-// Clear debug log at startup
-try {
-  fs.writeFileSync(DEBUG_LOG_FILE, `=== Git Theater Debug Log - ${new Date().toISOString()} ===\n`);
-} catch (error) {
-  // Ignore file write errors
+/**
+ * Simple loading indicator component
+ */
+function LoadingIndicator() {
+  return (
+    <Box paddingLeft={1} marginBottom={1}>
+      <Text color="gray">Assistant: </Text>
+      <Spinner type="dots" />
+      <Text color="gray" dimColor> thinking...</Text>
+    </Box>
+  );
 }
 
 /**
- * Main Git Chat application using terminal-chat-ui components
+ * Main Git Chat application with simplified message handling
  */
 function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -62,13 +51,10 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
   const [toolDisplayMode, setToolDisplayMode] = useState<ToolDisplayMode>('minimal');
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
-  // Use terminal-chat-ui message state management
+  // Use simplified message state management
   const {
     messages,
     addMessage,
-    addPendingMessage,
-    updateLastPendingMessage,
-    updateLastPendingMessageContent,
     addToolMessage,
     clearMessages
   } = useMessageState();
@@ -78,7 +64,7 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
     async function setupChannel() {
       try {
         setSetupStatus('connecting');
-        setSetupMessage('Connecting to Theater... (Debug logs: /tmp/git-theater-debug.log)');
+        setSetupMessage('Connecting to Theater...');
         await new Promise(resolve => setTimeout(resolve, 500));
 
         setSetupStatus('opening_channel');
@@ -90,85 +76,47 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
         setSetupMessage(`Starting ${workflow} workflow...`);
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Set up message handler
+        // Set up simplified message handler
         channelStream.onMessage((message) => {
           try {
             const messageText = Buffer.from(message.data).toString('utf8');
-
-            // Log raw incoming message
-            debugLog('\n🔍 [THEATER RAW]:', messageText);
-
             const parsedMessage = JSON.parse(messageText);
-
-            // Log parsed message structure
-            debugLog('📦 [THEATER PARSED]:', parsedMessage);
 
             if (parsedMessage.type === 'chat_message' && parsedMessage.message) {
               const messageEntry = parsedMessage?.message?.entry;
               const isUserMessage = messageEntry?.Message?.role === 'user';
 
-              debugLog('📝 [MESSAGE ENTRY]:', messageEntry);
-              debugLog('🤖 [IS USER MESSAGE]:', isUserMessage);
-
-              // Only show assistant messages
+              // Only process assistant messages
               if (!isUserMessage) {
                 const messageContent = messageEntry?.Message?.content || messageEntry?.Completion?.content;
                 const stopReason = messageEntry?.Message?.stop_reason || messageEntry?.Completion?.stop_reason;
 
-                debugLog('💬 [MESSAGE CONTENT]:', messageContent);
-                debugLog('🛑 [STOP REASON]:', stopReason);
-
                 if (Array.isArray(messageContent)) {
-                  let fullContent = '';
-                  let toolCalls: Array<{ name: string, args: string[] }> = [];
-
-                  debugLog('📦 [PROCESSING CONTENT BLOCKS]:', messageContent.length, 'blocks');
-
+                  let textContent = '';
+                  
                   // Process all content blocks
                   for (const block of messageContent) {
-                    debugLog('🧩 [CONTENT BLOCK]:', block);
-
                     if (block?.type === 'text' && block?.text) {
-                      debugLog('📝 [TEXT BLOCK]:', block.text.substring(0, 100) + '...');
-                      fullContent += block.text;
+                      textContent += block.text;
                     } else if (block?.type === 'tool_use') {
-                      debugLog('🔧 [TOOL BLOCK]:', block.name, 'with input:', block.input);
-                      toolCalls.push({
-                        name: block?.name || 'unknown',
-                        args: block?.input ? Object.values(block.input) : []
-                      });
+                      // Add tool message immediately
+                      addToolMessage(block?.name || 'unknown', 
+                        block?.input ? Object.values(block.input) : []);
                     }
                   }
 
-                  debugLog('🔧 [TOOL CALLS TO ADD]:', toolCalls.length);
-                  debugLog('📝 [FULL TEXT CONTENT]:', fullContent.substring(0, 200) + '...');
-
-                  if (fullContent.trim()) {
-                    debugLog('➕ [UPDATING PENDING MESSAGE WITH CONTENT]:', fullContent.substring(0, 100) + '...');
-                    updateLastPendingMessage(fullContent);
-                    if (stopReason && stopReason !== 'end_turn') {
-                      debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
-                      addPendingMessage('assistant', '');
-                    }
+                  // Add text content as a regular message if we have any
+                  if (textContent.trim()) {
+                    addMessage('assistant', textContent);
                   }
 
-                  for (const toolCall of toolCalls) {
-                    debugLog('➕ [ADDING TOOL MESSAGE]:', toolCall.name, toolCall.args);
-                    addToolMessage(toolCall.name, toolCall.args);
-                  }
                 } else if (typeof messageContent === 'string' && messageContent.trim()) {
-                  debugLog('📝 [UPDATING WITH STRING CONTENT]:', messageContent.substring(0, 100) + '...');
-                  updateLastPendingMessage(messageContent);
-                  if (stopReason && stopReason !== 'end_turn') {
-                    debugLog('➡️ [CONTINUING] Stop reason:', stopReason, '- adding new pending message');
-                    addPendingMessage('assistant', '');
-                  }
+                  // Add string content as a regular message
+                  addMessage('assistant', messageContent);
                 }
 
-                // If stop reason is not 'end_turn' and there is not an existing pending message, add another pending message
-                // as the assistant will continue after tool execution
-                if (stopReason && stopReason == 'end_turn') {
-                  debugLog('✅ [COMPLETED] Stop reason:', stopReason, '- finishing generation');
+                // Check if we're done generating
+                if (stopReason === 'end_turn') {
                   setIsGenerating(false);
                 }
               }
@@ -181,9 +129,8 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
 
         setChannel(channelStream);
 
-        // Start git workflow - add pending assistant message first
-        addPendingMessage('assistant', '');
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Start git workflow
+        setIsGenerating(true);
         await client.startGitWorkflow(session.domainActor);
 
         setSetupStatus('ready');
@@ -192,24 +139,22 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
         setSetupStatus('error');
         const errorMessage = error instanceof Error ? error.message : String(error);
         setSetupMessage(`Error: ${errorMessage}`);
+        setIsGenerating(false);
       }
     }
 
     setupChannel();
-  }, [client, session, workflow, addMessage, addToolMessage, updateLastPendingMessage, updateLastPendingMessageContent, addPendingMessage]);
+  }, [client, session, workflow, addMessage, addToolMessage]);
 
   // Send message function
   const sendMessage = useCallback(async (messageText: string) => {
-    if (!channel || !messageText.trim()) return;
+    if (!channel || !messageText.trim() || isGenerating) return;
 
     try {
       setIsGenerating(true);
 
       // Add user message
       addMessage('user', messageText.trim());
-
-      // Add pending assistant message
-      addPendingMessage('assistant', '');
 
       // Send message through domain actor
       await client.sendMessage(session.domainActor, messageText.trim());
@@ -219,9 +164,9 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
       addMessage('system', `Error sending message: ${errorMessage}`);
       setIsGenerating(false);
     }
-  }, [channel, client, session, addMessage, addPendingMessage]);
+  }, [channel, client, session, addMessage, isGenerating]);
 
-  // Use terminal-chat-ui keyboard shortcuts
+  // Use keyboard shortcuts
   useKeyboardShortcuts({
     shortcuts: [
       commonShortcuts.exit(() => process.exit(0)),
@@ -276,25 +221,31 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
       ) : (
         <>
           <Box flexDirection="column" flexGrow={1} width="100%" paddingLeft={1} paddingRight={1}>
-            {messages.length === 0 ? (
+            {messages.length === 0 && !isGenerating ? (
               <Text color="gray" dimColor>
                 [git] Ready for {workflow} workflow. Type your questions or let me analyze the repository.
               </Text>
             ) : (
-              messages.map((message, index) => (
-                <MessageComponent
-                  key={index}
-                  message={message}
-                  toolDisplayMode={toolDisplayMode}
-                  variant="git"
-                  prefixOverrides={{
-                    user: 'You: ',
-                    assistant: 'Assistant: ',
-                    system: '[git] ',
-                    tool: '[tool] '
-                  }}
-                />
-              ))
+              <>
+                {/* Render all messages */}
+                {messages.map((message, index) => (
+                  <MessageComponent
+                    key={index}
+                    message={message}
+                    toolDisplayMode={toolDisplayMode}
+                    variant="git"
+                    prefixOverrides={{
+                      user: 'You: ',
+                      assistant: 'Assistant: ',
+                      system: '[git] ',
+                      tool: '[tool] '
+                    }}
+                  />
+                ))}
+                
+                {/* Show loading indicator when generating */}
+                {isGenerating && <LoadingIndicator />}
+              </>
             )}
           </Box>
 
