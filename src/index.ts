@@ -17,7 +17,7 @@ import path from 'path';
 import { detectGitRepository, analyzeRepository, buildGitConfig, validateGitRepository } from './git-detector.js';
 import { GitTheaterClient } from './theater-client.js';
 import { renderGitChatApp } from './ui/GitChatUI.js';
-import type { GitWorkflow, CLIOptions } from './types.js';
+import type { GitWorkflow, CLIOptions, ExecutionMode } from './types.js';
 
 // Determine the workflow from the command name
 function getWorkflowFromCommand(): GitWorkflow {
@@ -49,6 +49,7 @@ program
   .description('Analyze changes and create commits')
   .option('-d, --directory <path>', 'Git repository path (auto-detected if not provided)')
   .option('-s, --server <address>', 'Theater server address', '127.0.0.1:9000')
+  .option('-m, --mode <mode>', 'Execution mode: workflow (auto-exit) or interactive (chat)', 'workflow')
   .option('-v, --verbose', 'Enable verbose logging')
   .action((options) => runWorkflow('commit', options));
 
@@ -57,6 +58,7 @@ program
   .description('Review code changes and provide feedback')
   .option('-d, --directory <path>', 'Git repository path (auto-detected if not provided)')
   .option('-s, --server <address>', 'Theater server address', '127.0.0.1:9000')
+  .option('-m, --mode <mode>', 'Execution mode: workflow (auto-exit) or interactive (chat)', 'workflow')
   .option('-v, --verbose', 'Enable verbose logging')
   .action((options) => runWorkflow('review', options));
 
@@ -65,6 +67,7 @@ program
   .description('Interactive rebase assistance')
   .option('-d, --directory <path>', 'Git repository path (auto-detected if not provided)')
   .option('-s, --server <address>', 'Theater server address', '127.0.0.1:9000')
+  .option('-m, --mode <mode>', 'Execution mode: workflow (auto-exit) or interactive (chat)', 'workflow')
   .option('-v, --verbose', 'Enable verbose logging')
   .action((options) => runWorkflow('rebase', options));
 
@@ -73,6 +76,7 @@ program
   .description('General git assistant chat')
   .option('-d, --directory <path>', 'Git repository path (auto-detected if not provided)')
   .option('-s, --server <address>', 'Theater server address', '127.0.0.1:9000')
+  .option('-m, --mode <mode>', 'Execution mode: workflow (auto-exit) or interactive (chat)', 'interactive')
   .option('-v, --verbose', 'Enable verbose logging')
   .action((options) => runWorkflow('chat', options));
 
@@ -81,8 +85,10 @@ if (process.argv.length === 2) {
   const workflow = getWorkflowFromCommand();
   if (workflow !== 'chat' || path.basename(process.argv[1]) === 'git-chat') {
     // Direct workflow command - run with default options
+    const defaultMode = workflow === 'chat' ? 'interactive' : 'workflow';
     runWorkflow(workflow, {
       server: '127.0.0.1:9000',
+      mode: defaultMode,
       verbose: false
     });
   } else {
@@ -135,11 +141,19 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
     }
     */
 
+    // Validate mode
+    const mode = options.mode || (workflow === 'chat' ? 'interactive' : 'workflow');
+    if (mode !== 'workflow' && mode !== 'interactive') {
+      console.error(chalk.red(`❌ Invalid mode: ${mode}. Must be 'workflow' or 'interactive'`));
+      process.exit(1);
+    }
+
     // Build configuration
-    const config = buildGitConfig(workflow, repoPath);
+    const config = buildGitConfig(workflow, repoPath, mode);
 
     if (options.verbose) {
-      console.log(chalk.cyan(`Starting ${workflow} workflow...`));
+      console.log(chalk.cyan(`Starting ${workflow} workflow in ${mode} mode...`));
+      console.log(chalk.gray(`Mode: ${mode === 'workflow' ? 'Auto-exit when complete' : 'Interactive chat'}`));
       console.log(chalk.gray(`Using git-chat-assistant actor`));
       console.log(chalk.gray(`Connecting to ${options.server || '127.0.0.1:9000'}`));
     }
@@ -156,7 +170,7 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
     //showWorkflowBanner(workflow, repository);
 
     // Start the interactive UI
-    await renderGitChatApp(client, session, repoPath, workflow);
+    await renderGitChatApp(client, session, repoPath, workflow, mode);
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);

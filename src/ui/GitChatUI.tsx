@@ -16,7 +16,7 @@ import {
   type SetupStatus
 } from '../terminal-chat-ui/index.js';
 
-import type { GitRepository, GitWorkflow, ChatSession } from '../types.js';
+import type { GitRepository, GitWorkflow, ChatSession, ExecutionMode } from '../types.js';
 import type { GitTheaterClient } from '../theater-client.js';
 import type { ChannelStream } from 'theater-client';
 
@@ -25,6 +25,21 @@ interface GitChatAppProps {
   session: ChatSession;
   repoPath: string;
   workflow: GitWorkflow;
+  mode: ExecutionMode;
+}
+
+/**
+ * Hook for graceful exit with actor cleanup
+ */
+function useGracefulExit(client: GitTheaterClient, session: ChatSession) {
+  return useCallback(async (exitCode: number = 0) => {
+    try {
+      await client.stopActor(session.domainActor);
+    } catch (error) {
+      // Ignore cleanup errors on exit
+    }
+    process.exit(exitCode);
+  }, [client, session]);
 }
 
 /**
@@ -43,7 +58,10 @@ function LoadingIndicator() {
 /**
  * Main Git Chat application with simplified message handling
  */
-function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
+function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppProps) {
+  const [workflowCompleted, setWorkflowCompleted] = useState<boolean>(false);
+  const [currentMode, setCurrentMode] = useState<ExecutionMode>(mode);
+  const gracefulExit = useGracefulExit(client, session);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [channel, setChannel] = useState<ChannelStream | null>(null);
   const [setupStatus, setSetupStatus] = useState<SetupStatus>('connecting');
@@ -166,12 +184,41 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
     }
   }, [channel, client, session, addMessage, isGenerating]);
 
+  // Auto-exit logic for workflow mode
+  useEffect(() => {
+    if (workflowCompleted && currentMode === 'workflow') {
+      gracefulExit(0);
+    }
+  }, [workflowCompleted, currentMode, gracefulExit]);
+
+  // Workflow completion detection
+  useEffect(() => {
+    if (currentMode === 'workflow' && !isGenerating && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage?.role === 'assistant' && !isGenerating) {
+        // Delay to show final message, then auto-exit
+        setTimeout(() => {
+          setWorkflowCompleted(true);
+        }, 2000);
+      }
+    }
+  }, [isGenerating, messages, currentMode]);
+
   // Use keyboard shortcuts
   useKeyboardShortcuts({
     shortcuts: [
-      commonShortcuts.exit(() => process.exit(0)),
+      commonShortcuts.exit(() => gracefulExit(0)),
       commonShortcuts.clear(clearMessages),
       commonShortcuts.toggleHelp(() => setShowHelp(!showHelp)),
+      {
+        key: 'i',
+        description: 'Switch to interactive mode',
+        action: () => {
+          if (currentMode === 'workflow') {
+            setCurrentMode('interactive');
+          }
+        }
+      },
       {
         key: 't',
         ctrl: true,
@@ -249,17 +296,45 @@ function GitChatApp({ client, session, repoPath, workflow }: GitChatAppProps) {
             )}
           </Box>
 
-          <Box width="100%" paddingLeft={1} paddingRight={1} paddingBottom={1}>
-            <Box width="100%">
-              <SmartInput
-                placeholder={isGenerating ? "Processing..." : "Message: "}
-                onSubmit={sendMessage}
-                disabled={isGenerating}
-                mode="auto"
-                autoMultilineThreshold={50}
-              />
+          {/* Conditional input rendering based on mode */}
+          {(currentMode === 'interactive' || showHelp) && (
+            <Box width="100%" paddingLeft={1} paddingRight={1} paddingBottom={1}>
+              <Box width="100%">
+                <SmartInput
+                  placeholder={isGenerating ? "Processing..." : "Message: "}
+                  onSubmit={sendMessage}
+                  disabled={isGenerating}
+                  mode="auto"
+                  autoMultilineThreshold={50}
+                />
+              </Box>
             </Box>
-          </Box>
+          )}
+
+          {/* Mode indicators */}
+          {currentMode === 'workflow' && !workflowCompleted && (
+            <Box paddingLeft={1} paddingY={1}>
+              <Text color="gray" dimColor>
+                {workflow} workflow mode • Press 'i' to enter interactive chat
+              </Text>
+            </Box>
+          )}
+
+          {currentMode === 'interactive' && (
+            <Box paddingLeft={1} paddingY={1}>
+              <Text color="green" dimColor>
+                Interactive mode • Chat with git assistant
+              </Text>
+            </Box>
+          )}
+
+          {currentMode === 'workflow' && workflowCompleted && (
+            <Box paddingLeft={1} paddingY={1}>
+              <Text color="green">
+                ✓ Workflow complete • Cleaning up...
+              </Text>
+            </Box>
+          )}
         </>
       )}
     </Box>
@@ -273,7 +348,8 @@ export async function renderGitChatApp(
   client: GitTheaterClient,
   session: ChatSession,
   repoPath: string,
-  workflow: GitWorkflow
+  workflow: GitWorkflow,
+  mode: ExecutionMode
 ): Promise<void> {
   let app: any = null;
 
@@ -303,6 +379,7 @@ export async function renderGitChatApp(
         session={session}
         repoPath={repoPath}
         workflow={workflow}
+        mode={mode}
       />
     );
 
