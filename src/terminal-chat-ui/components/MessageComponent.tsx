@@ -31,16 +31,16 @@ export function MessageComponent({
   // Default prefixes based on variant
   const getDefaultPrefixes = (variant: string) => {
     const base = {
-      user: '👤 You: ',
+      user: 'You: ',
       assistant: 'Assistant: ',
-      system: 'ℹ️  system: ',
+      system: '[system] ',
       tool: '[tool] '
     };
 
     // Customize based on variant
     switch (variant) {
       case 'git':
-        return { ...base, system: 'ℹ️  git: ' };
+        return { ...base, system: '[git] ' };
       case 'chat':
         return { ...base, assistant: 'Chat: ' };
       default:
