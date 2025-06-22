@@ -48,7 +48,7 @@ function useGracefulExit(client: GitTheaterClient, session: ChatSession) {
  */
 function LoadingIndicator() {
   return (
-    <Box paddingLeft={1} marginBottom={1}>
+    <Box paddingLeft={1} marginY={1}>
       <Text color="gray">Assistant: </Text>
       <Spinner type="dots" />
       <Text color="gray" dimColor> thinking...</Text>
