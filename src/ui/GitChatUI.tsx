@@ -59,10 +59,10 @@ function LoadingIndicator() {
 /**
  * MultiLineInput wrapper with proper vim-style mode management
  */
-function MultiLineInputWithModes({ 
-  placeholder, 
-  onSubmit, 
-  disabled 
+function MultiLineInputWithModes({
+  placeholder,
+  onSubmit,
+  disabled
 }: {
   placeholder: string;
   onSubmit: (content: string) => void;
@@ -97,7 +97,7 @@ function MultiLineInputWithModes({
         onContentChange={setContent}
         onCursorChange={setCursorPosition}
       />
-      
+
       {/* Mode help text */}
       <Box paddingLeft={1}>
         <Text color="gray" dimColor>
@@ -117,7 +117,7 @@ function MultiLineInputWithModes({
  */
 function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppProps) {
   const { isRawModeSupported } = useStdin();
-  
+
   // Check for raw mode support
   if (!isRawModeSupported) {
     return (
@@ -128,7 +128,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
       </Box>
     );
   }
-  
+
   const [workflowCompleted, setWorkflowCompleted] = useState<boolean>(false);
   const [currentMode, setCurrentMode] = useState<ExecutionMode>(mode);
   const gracefulExit = useGracefulExit(client, session);
@@ -391,7 +391,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
           )}
 
           {currentMode === 'interactive' && (
-            <Box paddingLeft={1} paddingY={1}>
+            <Box paddingLeft={1} >
               <Text color="green" dimColor>
                 Interactive mode • Chat with git assistant
               </Text>
