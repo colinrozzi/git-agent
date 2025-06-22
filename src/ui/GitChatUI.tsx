@@ -73,12 +73,10 @@ function MultiLineInputWithModes({
   const [mode, setMode] = useState<'insert' | 'command'>('insert');
 
   const handleModeChange = useCallback((newMode: 'insert' | 'command') => {
-    console.log('[MultiLineInputWithModes] Mode changed:', newMode);
     setMode(newMode);
   }, []);
 
   const handleSubmit = useCallback((submittedContent: string) => {
-    console.log('[MultiLineInputWithModes] Submit:', submittedContent);
     onSubmit(submittedContent);
     // Reset state after submit
     setContent('');

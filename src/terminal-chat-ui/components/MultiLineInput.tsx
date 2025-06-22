@@ -22,17 +22,6 @@ export function MultiLineInput({
   disabled = false
 }: MultiLineInputProps) {
 
-  // DEBUG: Log when component mounts and when props change
-  useEffect(() => {
-    console.log('[MultiLineInput] Props changed:', {
-      content,
-      cursorPosition,
-      hasOnContentChange: !!onContentChange,
-      hasOnCursorChange: !!onCursorChange,
-      disabled
-    });
-  }, [content, cursorPosition, onContentChange, onCursorChange, disabled]);
-
   // Use internal state if not controlled
   const [internalContent, setInternalContent] = useState('');
   const [internalCursorPosition, setInternalCursorPosition] = useState(0);
@@ -43,13 +32,6 @@ export function MultiLineInput({
   // Get current values (controlled or uncontrolled)
   const actualContent = isControlled ? content : internalContent;
   const actualCursorPosition = isControlled ? cursorPosition : internalCursorPosition;
-  
-  console.log('[MultiLineInput] Current state:', {
-    isControlled,
-    actualContent: JSON.stringify(actualContent),
-    actualCursorPosition,
-    contentLength: actualContent.length
-  });
 
   // Convert content to lines for display
   const lines = actualContent.split('\n');
@@ -68,7 +50,6 @@ export function MultiLineInput({
 
   // Text manipulation functions
   const insertText = useCallback((text: string) => {
-    console.log('[MultiLineInput] insertText called:', { text, disabled, isControlled });
     if (disabled) return;
     
     const before = actualContent.slice(0, actualCursorPosition);
@@ -86,7 +67,6 @@ export function MultiLineInput({
   }, [actualContent, actualCursorPosition, onContentChange, onCursorChange, disabled, isControlled]);
 
   const deleteChar = useCallback((direction: 'forward' | 'backward' = 'backward') => {
-    console.log('[MultiLineInput] deleteChar called:', { direction, disabled, isControlled });
     if (disabled) return;
     
     if (direction === 'backward' && actualCursorPosition > 0) {
@@ -118,7 +98,6 @@ export function MultiLineInput({
   }, [actualContent, actualCursorPosition, onContentChange, onCursorChange, disabled, isControlled]);
 
   const moveCursor = useCallback((newPos: number) => {
-    console.log('[MultiLineInput] moveCursor called:', { newPos, disabled, isControlled });
     if (disabled) return;
     const clampedPos = Math.max(0, Math.min(actualContent.length, newPos));
     
@@ -130,7 +109,6 @@ export function MultiLineInput({
   }, [actualContent.length, onCursorChange, disabled, isControlled]);
 
   const handleSubmit = useCallback((): void => {
-    console.log('[MultiLineInput] handleSubmit called:', { disabled, isControlled, actualContent });
     if (disabled) return;
     const trimmed = actualContent.trim();
     if (trimmed) {
@@ -148,12 +126,6 @@ export function MultiLineInput({
 
   // Key input handler
   useInput((input: string, key: any) => {
-    console.log('[MultiLineInput] useInput called:', { 
-      input: JSON.stringify(input), 
-      key: Object.keys(key).filter(k => key[k]).join(','),
-      disabled,
-      mode 
-    });
     if (disabled) return;
 
     if (key.escape) {
