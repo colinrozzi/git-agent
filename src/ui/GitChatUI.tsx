@@ -18,7 +18,7 @@ import {
 } from '../terminal-chat-ui/index.js';
 
 import type { GitRepository, GitWorkflow, ChatSession, ExecutionMode, CLIOptions, GitTheaterConfig } from '../types.js';
-import { GitTheaterClient } from '../theater-client.js';
+import { GitTheaterClient, type ActorLifecycleCallbacks } from '../theater-client.js';
 import type { ChannelStream } from 'theater-client';
 
 interface GitChatAppProps {
@@ -189,7 +189,46 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
 
         setSetupStatus('starting_actor');
         setSetupMessage(`Spinning up Actor...`);
-        const domainActor = await client.startDomainActor(config.actor.manifest_path, config.actor.initial_state);
+        
+        // Create actor lifecycle callbacks
+        const actorCallbacks: ActorLifecycleCallbacks = {
+          onActorExit: (result: any) => {
+            console.log('Domain actor exited:', result);
+            addMessage('system', 'Git assistant has shut down.');
+            
+            // Trigger app shutdown
+            setTimeout(async () => {
+              await cleanup();
+              process.exit(0);
+            }, 1000); // Give user time to see the message
+          },
+          
+          onActorError: (error: any) => {
+            console.error('Domain actor error:', error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            addMessage('system', `Git assistant error: ${errorMessage}`);
+            
+            // Trigger app shutdown on error
+            setTimeout(async () => {
+              await cleanup();
+              process.exit(1);
+            }, 2000); // Give user time to see the error
+          },
+          
+          onActorEvent: (event: any) => {
+            // Optional: handle specific events if needed
+            if (options.verbose) {
+              console.log('Domain actor event:', event);
+            }
+          }
+        };
+
+        // Start domain actor with callbacks
+        const domainActor = await client.startDomainActor(
+          config.actor.manifest_path, 
+          config.actor.initial_state,
+          actorCallbacks
+        );
         setSetupMessage(`Actor started: ${domainActor.id}`);
         setSetupStatus('loading_actor');
         const chatActorId = await client.getChatStateActorId(domainActor);

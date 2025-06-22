@@ -5,6 +5,13 @@
 import { TheaterClient, Actor, ChannelStream, setLogLevel } from 'theater-client';
 import type { GitTheaterConfig, ChatSession } from './types.js';
 
+// New type for actor lifecycle callbacks
+export interface ActorLifecycleCallbacks {
+  onActorExit?: (result: any) => void;
+  onActorError?: (error: any) => void;
+  onActorEvent?: (event: any) => void;
+}
+
 export class GitTheaterClient {
   private client: TheaterClient;
 
@@ -28,25 +35,41 @@ export class GitTheaterClient {
   }
 
   /**
-   * Start a domain actor
+   * Start a domain actor with lifecycle callbacks
    */
-  async startDomainActor(manifestPath: string, initialState: any = {}): Promise<Actor> {
+  async startDomainActor(
+    manifestPath: string, 
+    initialState: any = {}, 
+    callbacks?: ActorLifecycleCallbacks
+  ): Promise<Actor> {
     const actor = await this.client.startActor({
       manifest: manifestPath,
       initialState: new TextEncoder().encode(JSON.stringify(initialState)),
-      onEvent: (event => {
-        //console.log(`Domain actor event: ${JSON.stringify(event)}`);
-      }),
-      onError: (error => {
-        console.error(`Domain actor error: ${error instanceof Error ? error.message : String(error)}`);
-      }),
-      onActorResult: (result => {
-        if (result.type === 'Error') {
-          console.error(`Domain actor error: ${result.error instanceof Error ? result.error.message : String(result.error)}`);
-        } else {
-          console.log(`Domain actor result: ${JSON.stringify(result)}`);
+      onEvent: (event) => {
+        // Call user-provided event callback if provided
+        if (callbacks?.onActorEvent) {
+          callbacks.onActorEvent(event);
         }
-      })
+        // You can also log events if verbose mode is enabled
+        // console.log(`Domain actor event: ${JSON.stringify(event)}`);
+      },
+      onError: (error) => {
+        console.error(`Domain actor error: ${error instanceof Error ? error.message : String(error)}`);
+        
+        // Call user-provided error callback
+        if (callbacks?.onActorError) {
+          callbacks.onActorError(error);
+        }
+      },
+      onActorResult: (result) => {
+        // This gets called when the actor exits/completes
+        console.log(`Domain actor exited with result: ${JSON.stringify(result)}`);
+        
+        // Call user-provided exit callback
+        if (callbacks?.onActorExit) {
+          callbacks.onActorExit(result);
+        }
+      }
     });
 
     return actor;
@@ -68,24 +91,36 @@ export class GitTheaterClient {
   }
 
   /**
-   * Start a git workflow session
+   * Start a git workflow session with lifecycle callbacks
    */
-  async startGitSession(config: GitTheaterConfig): Promise<ChatSession> {
+  async startGitSession(config: GitTheaterConfig, callbacks?: ActorLifecycleCallbacks): Promise<ChatSession> {
     // Start git-chat-assistant domain actor
     const domainActor = await this.client.startActor({
       manifest: config.actor.manifest_path,
       initialState: new TextEncoder().encode(JSON.stringify(config.actor.initial_state)),
       onEvent: (event) => {
+        if (callbacks?.onActorEvent) {
+          callbacks.onActorEvent(event);
+        }
         console.log(`Domain actor event: ${JSON.stringify(event)}`);
       },
       onError: (error) => {
         console.error(`Domain actor error: ${error instanceof Error ? error.message : String(error)}`);
+        if (callbacks?.onActorError) {
+          callbacks.onActorError(error);
+        }
       },
       onActorResult: (result) => {
         if (result.type === 'Error') {
           console.error(`Domain actor error: ${result.error instanceof Error ? result.error.message : String(result.error)}`);
+          if (callbacks?.onActorError) {
+            callbacks.onActorError(result.error);
+          }
         } else {
           console.log(`Domain actor result: ${JSON.stringify(result)}`);
+          if (callbacks?.onActorExit) {
+            callbacks.onActorExit(result);
+          }
         }
       }
     });
