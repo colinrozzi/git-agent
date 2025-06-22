@@ -194,7 +194,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
         // Create actor lifecycle callbacks
         const actorCallbacks: ActorLifecycleCallbacks = {
           onActorExit: (result: any) => {
-            console.log('Domain actor exited:', result);
+            //console.log('Domain actor exited:', result);
             setActorHasExited(true);
             setIsGenerating(false);
 
@@ -402,8 +402,8 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
     <Box flexDirection="column" height="100%" width="100%">
       {session && (
         <Box flexDirection="column" alignItems="flex-start" >
-          <Text color="white" dimColor> management actor-id: {session.domainActor.id} </Text>
-          <Text color="white" dimColor>       chat actor-id: {session.chatActorId} </Text>
+          <Text color="gray"> management actor-id: {session.domainActor.id} </Text>
+          <Text color="gray">       chat actor-id: {session.chatActorId} </Text>
         </Box>
       )}
 
