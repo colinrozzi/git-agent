@@ -159,8 +159,8 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
     }
 
     // Create client and start session
-    client = new GitTheaterClient(options.server || '127.0.0.1:9000', options.verbose || false);
-    session = await client.startGitSession(config);
+    //client = new GitTheaterClient(options.server || '127.0.0.1:9000', options.verbose || false);
+    //session = await client.startGitSession(config);
 
     if (options.verbose) {
       console.log(chalk.green(`Session started - Domain: ${session.domainActor.id}, Chat: ${session.chatActorId}`));
@@ -170,7 +170,7 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
     //showWorkflowBanner(workflow, repository);
 
     // Start the interactive UI
-    await renderGitChatApp(client, session, repoPath, workflow, mode);
+    await renderGitChatApp(options, config, repoPath, workflow, mode);
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);

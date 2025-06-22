@@ -17,13 +17,16 @@ import {
   MultiLineInput
 } from '../terminal-chat-ui/index.js';
 
-import type { GitRepository, GitWorkflow, ChatSession, ExecutionMode } from '../types.js';
-import type { GitTheaterClient } from '../theater-client.js';
+import type { GitRepository, GitWorkflow, ChatSession, ExecutionMode, CLIOptions, GitTheaterConfig } from '../types.js';
+import { GitTheaterClient } from '../theater-client.js';
 import type { ChannelStream } from 'theater-client';
 
 interface GitChatAppProps {
-  client: GitTheaterClient;
-  session: ChatSession;
+  options: {
+    server?: string;
+    verbose?: boolean;
+  };
+  config: GitTheaterConfig;
   repoPath: string;
   workflow: GitWorkflow;
   mode: ExecutionMode;
@@ -115,7 +118,7 @@ function MultiLineInputWithModes({
 /**
  * Main Git Chat application with simplified message handling
  */
-function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppProps) {
+function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppProps) {
   const { isRawModeSupported } = useStdin();
 
   // Check for raw mode support
@@ -131,6 +134,8 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
 
   const [workflowCompleted, setWorkflowCompleted] = useState<boolean>(false);
   const [currentMode, setCurrentMode] = useState<ExecutionMode>(mode);
+  const [client, setClient] = useState<GitTheaterClient | null>(null);
+  const [session, setSession] = useState<ChatSession | null>(null);
   const gracefulExit = useGracefulExit(client, session);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [channel, setChannel] = useState<ChannelStream | null>(null);
@@ -153,6 +158,11 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
       try {
         setSetupStatus('connecting');
         setSetupMessage('Connecting to Theater...');
+
+        const client = new GitTheaterClient(options.server || '127.0.0.1:9000', options.verbose || false);
+        setClient(client);
+        const session = await client.startGitSession(config);
+        setSession(session);
         //await new Promise(resolve => setTimeout(resolve, 500));
 
         setSetupStatus('opening_channel');
@@ -239,7 +249,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
     }
 
     setupChannel();
-  }, [client, session, workflow, addMessage, addToolMessage]);
+  }, [workflow, addMessage, addToolMessage]);
 
   // Send message function
   const sendMessage = useCallback(async (messageText: string) => {
@@ -422,8 +432,8 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
  * Render the Git Chat app
  */
 export async function renderGitChatApp(
-  client: GitTheaterClient,
-  session: ChatSession,
+  options: CLIOptions,
+  config: GitTheaterConfig,
   repoPath: string,
   workflow: GitWorkflow,
   mode: ExecutionMode
@@ -431,14 +441,6 @@ export async function renderGitChatApp(
   let app: any = null;
 
   const cleanup = async () => {
-    try {
-      if (session && client) {
-        await client.stopActor(session.domainActor);
-      }
-    } catch (error) {
-      // Ignore cleanup errors
-    }
-
     if (app) {
       app.unmount();
     }
@@ -452,8 +454,8 @@ export async function renderGitChatApp(
   try {
     app = render(
       <GitChatApp
-        client={client}
-        session={session}
+        options={options}
+        config={config}
         repoPath={repoPath}
         workflow={workflow}
         mode={mode}
