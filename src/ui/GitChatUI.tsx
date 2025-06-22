@@ -457,13 +457,7 @@ export async function renderGitChatApp(
         repoPath={repoPath}
         workflow={workflow}
         mode={mode}
-      />,
-      {
-        // Key options to preserve terminal scrollback
-        patchConsole: false,    // Don't hijack console
-        exitOnCtrlC: false,     // Handle Ctrl+C manually
-        debug: false            // Disable debug mode
-      }
+      />
     );
 
     await app.waitUntilExit();
