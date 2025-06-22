@@ -24,7 +24,7 @@ export interface GitTheaterConfig {
 
 export interface GitAssistantInitialState {
   current_directory: string;
-  workflow?: GitWorkflow;
+  task?: GitWorkflow;
   temperature?: number;
   max_tokens?: number;
   title?: string;
