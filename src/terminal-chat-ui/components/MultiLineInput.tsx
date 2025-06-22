@@ -25,10 +25,10 @@ export function MultiLineInput({
   // Use internal state if not controlled
   const [internalContent, setInternalContent] = useState('');
   const [internalCursorPosition, setInternalCursorPosition] = useState(0);
-  
+
   // Determine if we're in controlled mode
   const isControlled = onContentChange !== undefined;
-  
+
   // Get current values (controlled or uncontrolled)
   const actualContent = isControlled ? content : internalContent;
   const actualCursorPosition = isControlled ? cursorPosition : internalCursorPosition;
@@ -51,7 +51,7 @@ export function MultiLineInput({
   // Text manipulation functions
   const insertText = useCallback((text: string) => {
     if (disabled) return;
-    
+
     const before = actualContent.slice(0, actualCursorPosition);
     const after = actualContent.slice(actualCursorPosition);
     const newContent = before + text + after;
@@ -68,7 +68,7 @@ export function MultiLineInput({
 
   const deleteChar = useCallback((direction: 'forward' | 'backward' = 'backward') => {
     if (disabled) return;
-    
+
     if (direction === 'backward' && actualCursorPosition > 0) {
       const before = actualContent.slice(0, actualCursorPosition - 1);
       const after = actualContent.slice(actualCursorPosition);
@@ -100,7 +100,7 @@ export function MultiLineInput({
   const moveCursor = useCallback((newPos: number) => {
     if (disabled) return;
     const clampedPos = Math.max(0, Math.min(actualContent.length, newPos));
-    
+
     if (isControlled) {
       onCursorChange?.(clampedPos);
     } else {
@@ -228,7 +228,7 @@ export function MultiLineInput({
         paddingRight={1}
         flexDirection="column"
         minHeight={3}
-        width="80%"
+        width="100%"
       >
         <Box flexDirection="column">
           {isEmpty ? (
@@ -251,8 +251,8 @@ export function MultiLineInput({
               return (
                 <Text key={index}>
                   {beforeCursor}
-                  <Text 
-                    backgroundColor={disabled ? "gray" : (mode === 'command' ? "blue" : "white")} 
+                  <Text
+                    backgroundColor={disabled ? "gray" : (mode === 'command' ? "blue" : "white")}
                     color={mode === 'command' ? "white" : "black"}
                   >
                     {atCursor}
