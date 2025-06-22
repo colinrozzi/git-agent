@@ -381,9 +381,8 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
             </Box>
           )}
 
-          {/* Mode indicators */}
           {currentMode === 'workflow' && !workflowCompleted && (
-            <Box paddingLeft={1} paddingY={1}>
+            <Box paddingLeft={1}>
               <Text color="gray" dimColor>
                 {workflow} workflow mode • Press 'i' to enter interactive chat
               </Text>
@@ -394,14 +393,6 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
             <Box paddingLeft={1} >
               <Text color="green" dimColor>
                 Interactive mode • Chat with git assistant
-              </Text>
-            </Box>
-          )}
-
-          {currentMode === 'workflow' && !workflowCompleted && (
-            <Box paddingLeft={1} >
-              <Text color="yellow" dimColor>
-                Workflow in progress • Press 'i' to switch to interactive mode
               </Text>
             </Box>
           )}
