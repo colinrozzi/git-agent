@@ -13,7 +13,8 @@ import {
   useKeyboardShortcuts,
   commonShortcuts,
   type ToolDisplayMode,
-  type SetupStatus
+  type SetupStatus,
+  MultiLineInput
 } from '../terminal-chat-ui/index.js';
 
 import type { GitRepository, GitWorkflow, ChatSession, ExecutionMode } from '../types.js';
@@ -302,12 +303,10 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
           {(currentMode === 'interactive' || showHelp) && (
             <Box width="100%" paddingLeft={1} paddingRight={1} paddingBottom={1}>
               <Box width="100%">
-                <SmartInput
+                <MultiLineInput
                   placeholder={isGenerating ? "Processing..." : "Message: "}
                   onSubmit={sendMessage}
                   disabled={isGenerating}
-                  mode="auto"
-                  autoMultilineThreshold={50}
                 />
               </Box>
             </Box>
