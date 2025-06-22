@@ -102,22 +102,22 @@ export class GitTheaterClient {
         if (callbacks?.onActorEvent) {
           callbacks.onActorEvent(event);
         }
-        console.log(`Domain actor event: ${JSON.stringify(event)}`);
+        //console.log(`Domain actor event: ${JSON.stringify(event)}`);
       },
       onError: (error) => {
-        console.error(`Domain actor error: ${error instanceof Error ? error.message : String(error)}`);
+        //console.error(`Domain actor error: ${error instanceof Error ? error.message : String(error)}`);
         if (callbacks?.onActorError) {
           callbacks.onActorError(error);
         }
       },
       onActorResult: (result) => {
         if (result.type === 'Error') {
-          console.error(`Domain actor error: ${result.error instanceof Error ? result.error.message : String(result.error)}`);
+          //console.error(`Domain actor error: ${result.error instanceof Error ? result.error.message : String(result.error)}`);
           if (callbacks?.onActorError) {
             callbacks.onActorError(result.error);
           }
         } else {
-          console.log(`Domain actor result: ${JSON.stringify(result)}`);
+          //console.log(`Domain actor result: ${JSON.stringify(result)}`);
           if (callbacks?.onActorExit) {
             callbacks.onActorExit(result);
           }
