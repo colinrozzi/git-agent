@@ -104,18 +104,6 @@ if (process.argv.length === 2) {
  * Run a git workflow
  */
 async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<void> {
-  let client: GitTheaterClient | null = null;
-  let session: any = null;
-
-  // Signal handlers
-  process.on('SIGINT', () => {
-    process.exit(0);
-  });
-
-  process.on('SIGTERM', () => {
-    process.exit(0);
-  });
-
   try {
     // Detect and validate git repository
     const repoPath = options.directory || detectGitRepository();
@@ -158,13 +146,7 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
       console.log(chalk.gray(`Connecting to ${options.server || '127.0.0.1:9000'}`));
     }
 
-    // Create client and start session
-    //client = new GitTheaterClient(options.server || '127.0.0.1:9000', options.verbose || false);
-    //session = await client.startGitSession(config);
 
-    if (options.verbose) {
-      console.log(chalk.green(`Session started - Domain: ${session.domainActor.id}, Chat: ${session.chatActorId}`));
-    }
 
     // Show workflow banner
     //showWorkflowBanner(workflow, repository);
@@ -181,15 +163,6 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
     }
 
     process.exit(1);
-  } finally {
-    // Cleanup
-    if (session && client) {
-      try {
-        await client.stopActor(session.domainActor);
-      } catch (error) {
-        // Ignore cleanup errors
-      }
-    }
   }
 }
 

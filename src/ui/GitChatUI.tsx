@@ -30,20 +30,7 @@ interface GitChatAppProps {
   repoPath: string;
   workflow: GitWorkflow;
   mode: ExecutionMode;
-}
-
-/**
- * Hook for graceful exit with actor cleanup
- */
-function useGracefulExit(client: GitTheaterClient, session: ChatSession) {
-  return useCallback(async (exitCode: number = 0) => {
-    try {
-      await client.stopActor(session.domainActor);
-    } catch (error) {
-      // Ignore cleanup errors on exit
-    }
-    process.exit(exitCode);
-  }, [client, session]);
+  onCleanupReady?: (cleanup: () => Promise<void>) => void;
 }
 
 /**
@@ -118,7 +105,7 @@ function MultiLineInputWithModes({
 /**
  * Main Git Chat application with simplified message handling
  */
-function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppProps) {
+function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady }: GitChatAppProps) {
   const { isRawModeSupported } = useStdin();
 
   // Check for raw mode support
@@ -136,13 +123,13 @@ function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppPro
   const [currentMode, setCurrentMode] = useState<ExecutionMode>(mode);
   const [client, setClient] = useState<GitTheaterClient | null>(null);
   const [session, setSession] = useState<ChatSession | null>(null);
-  const gracefulExit = useGracefulExit(client, session);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [channel, setChannel] = useState<ChannelStream | null>(null);
   const [setupStatus, setSetupStatus] = useState<SetupStatus>('connecting');
   const [setupMessage, setSetupMessage] = useState<string>('Connecting to Theater...');
   const [toolDisplayMode, setToolDisplayMode] = useState<ToolDisplayMode>('minimal');
   const [showHelp, setShowHelp] = useState<boolean>(false);
+
 
   // Use simplified message state management
   const {
@@ -151,6 +138,44 @@ function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppPro
     addToolMessage,
     clearMessages
   } = useMessageState();
+
+  // Create cleanup function that can be called from outside
+  const cleanup = useCallback(async () => {
+    try {
+      if (options.verbose) {
+        console.log('\nCleaning up actors...');
+      }
+      
+      // Close channel first
+      if (channel) {
+        try {
+          channel.close();
+        } catch (error) {
+          // Ignore channel close errors
+        }
+      }
+
+      // Stop actor
+      if (session && client) {
+        await client.stopActor(session.domainActor);
+        if (options.verbose) {
+          console.log('Cleanup completed.');
+        }
+      }
+    } catch (error) {
+      if (options.verbose) {
+        console.error(`Warning: Cleanup error - ${error instanceof Error ? error.message : String(error)}`);
+      }
+      // Don't throw - we want to exit gracefully even if cleanup fails
+    }
+  }, [client, session, channel, options.verbose]);
+
+  // Expose cleanup function to parent when ready
+  useEffect(() => {
+    if (client && session && onCleanupReady) {
+      onCleanupReady(cleanup);
+    }
+  }, [client, session, cleanup, onCleanupReady]);
 
   // Setup channel communication
   useEffect(() => {
@@ -280,9 +305,13 @@ function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppPro
   // Auto-exit logic for workflow mode
   useEffect(() => {
     if (workflowCompleted && currentMode === 'workflow') {
-      gracefulExit(0);
+      const autoExit = async () => {
+        await cleanup();
+        process.exit(0);
+      };
+      autoExit();
     }
-  }, [workflowCompleted, currentMode, gracefulExit]);
+  }, [workflowCompleted, currentMode, cleanup]);
 
   // Workflow completion detection
   useEffect(() => {
@@ -298,7 +327,10 @@ function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppPro
   // Use keyboard shortcuts
   useKeyboardShortcuts({
     shortcuts: [
-      commonShortcuts.exit(() => gracefulExit(0)),
+      commonShortcuts.exit(async () => {
+        await cleanup();
+        process.exit(0);
+      }),
       commonShortcuts.clear(clearMessages),
       commonShortcuts.toggleHelp(() => setShowHelp(!showHelp)),
       {
@@ -445,7 +477,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppPro
 }
 
 /**
- * Render the Git Chat app
+ * Render the Git Chat app with proper cleanup handling
  */
 export async function renderGitChatApp(
   options: CLIOptions,
@@ -455,19 +487,56 @@ export async function renderGitChatApp(
   mode: ExecutionMode
 ): Promise<void> {
   let app: any = null;
+  let appCleanup: (() => Promise<void>) | null = null;
+  let signalHandlersRegistered = false;
 
   const cleanup = async () => {
-    if (app) {
-      app.unmount();
+    try {
+      // Call app-specific cleanup first (stops actors)
+      if (appCleanup) {
+        await appCleanup();
+      }
+    } catch (error) {
+      if (options.verbose) {
+        console.error(`Cleanup error: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    } finally {
+      // Always unmount the app
+      if (app) {
+        app.unmount();
+      }
     }
   };
 
-  // Set up cleanup on exit
-  process.on('exit', cleanup);
-  process.on('SIGINT', cleanup);
-  process.on('SIGTERM', cleanup);
+  const setupSignalHandlers = () => {
+    if (signalHandlersRegistered) return;
+    signalHandlersRegistered = true;
+
+    const handleSignal = async (signal: string) => {
+      if (options.verbose) {
+        console.log(`\nReceived ${signal}, cleaning up...`);
+      }
+      await cleanup();
+      process.exit(signal === 'SIGINT' ? 130 : 143); // Standard exit codes
+    };
+
+    process.on('SIGINT', () => handleSignal('SIGINT'));
+    process.on('SIGTERM', () => handleSignal('SIGTERM'));
+    
+    // Also handle process exit
+    process.on('exit', async () => {
+      // Note: In 'exit' handler, you can't do async operations
+      // So we only do synchronous cleanup here
+      if (app) {
+        app.unmount();
+      }
+    });
+  };
 
   try {
+    // Set up signal handlers early
+    setupSignalHandlers();
+
     app = render(
       <GitChatApp
         options={options}
@@ -475,13 +544,28 @@ export async function renderGitChatApp(
         repoPath={repoPath}
         workflow={workflow}
         mode={mode}
+        onCleanupReady={(cleanupFn) => {
+          appCleanup = cleanupFn;
+          if (options.verbose) {
+            console.log('Cleanup handlers registered');
+          }
+        }}
       />
     );
 
-    await app.waitUntilExit();
+    // Wait for the app to finish (in case of workflow mode auto-exit)
+    await new Promise<void>((resolve) => {
+      app.waitUntilExit().then(() => {
+        resolve();
+      });
+    });
+
   } catch (error) {
-    console.error('App error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`Error: ${errorMessage}`);
+    await cleanup();
+    process.exit(1);
   } finally {
-    cleanup();
+    await cleanup();
   }
 }
