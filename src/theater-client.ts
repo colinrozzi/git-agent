@@ -38,8 +38,8 @@ export class GitTheaterClient {
    * Start a domain actor with lifecycle callbacks
    */
   async startDomainActor(
-    manifestPath: string, 
-    initialState: any = {}, 
+    manifestPath: string,
+    initialState: any = {},
     callbacks?: ActorLifecycleCallbacks
   ): Promise<Actor> {
     const actor = await this.client.startActor({
@@ -54,8 +54,8 @@ export class GitTheaterClient {
         // console.log(`Domain actor event: ${JSON.stringify(event)}`);
       },
       onError: (error) => {
-        console.error(`Domain actor error: ${error instanceof Error ? error.message : String(error)}`);
-        
+        //console.error(`Domain actor error: ${error instanceof Error ? error.message : String(error)}`);
+
         // Call user-provided error callback
         if (callbacks?.onActorError) {
           callbacks.onActorError(error);
@@ -63,8 +63,8 @@ export class GitTheaterClient {
       },
       onActorResult: (result) => {
         // This gets called when the actor exits/completes
-        console.log(`Domain actor exited with result: ${JSON.stringify(result)}`);
-        
+        //console.log(`Domain actor exited with result: ${JSON.stringify(result)}`);
+
         // Call user-provided exit callback
         if (callbacks?.onActorExit) {
           callbacks.onActorExit(result);
