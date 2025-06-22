@@ -339,7 +339,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
         </Box>
       ) : (
         <>
-          <Box flexDirection="column" width="100%" paddingLeft={1} paddingRight={1}>
+          <Box flexDirection="column" width="100%" paddingLeft={1} paddingRight={1} marginTop={1}>
             {messages.length === 0 && !isGenerating ? (
               <Text color="gray" dimColor>
                 [git] Ready for {workflow} workflow. Type your questions or let me analyze the repository.
