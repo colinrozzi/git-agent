@@ -161,6 +161,9 @@ function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppPro
 
         const client = new GitTheaterClient(options.server || '127.0.0.1:9000', options.verbose || false);
         setClient(client);
+
+        setSetupStatus('starting_actor');
+        setSetupMessage(`Spinning up Actor...`);
         const session = await client.startGitSession(config);
         setSession(session);
         //await new Promise(resolve => setTimeout(resolve, 500));

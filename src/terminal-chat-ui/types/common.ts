@@ -13,7 +13,7 @@ export interface Message {
 }
 
 // Setup and connection states
-export type SetupStatus = 'connecting' | 'opening_channel' | 'loading_actor' | 'ready' | 'error';
+export type SetupStatus = 'connecting' | 'starting_actor' | 'opening_channel' | 'loading_actor' | 'ready' | 'error';
 
 // Tool display configuration
 export type ToolDisplayMode = 'hidden' | 'minimal' | 'full';
