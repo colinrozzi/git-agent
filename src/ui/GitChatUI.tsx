@@ -338,6 +338,13 @@ function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppPro
 
   return (
     <Box flexDirection="column" height="100%" width="100%">
+      {session && (
+        <Box flexDirection="row" justifyContent="space-between" padding={1}>
+          <Text color="green"> Domain Actor {session.domainActor} </Text>
+          <Text color="cyan"> Chat Actor {session.chatActorId} </Text>
+        </Box>
+      )}
+
       {showHelp && (
         <HelpPanel
           shortcuts={[
