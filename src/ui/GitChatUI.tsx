@@ -129,6 +129,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
   const [setupMessage, setSetupMessage] = useState<string>('Connecting to Theater...');
   const [toolDisplayMode, setToolDisplayMode] = useState<ToolDisplayMode>('minimal');
   const [showHelp, setShowHelp] = useState<boolean>(false);
+  const [actorHasExited, setActorHasExited] = useState<boolean>(false);
 
 
   // Use simplified message state management
@@ -194,6 +195,8 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
         const actorCallbacks: ActorLifecycleCallbacks = {
           onActorExit: (result: any) => {
             console.log('Domain actor exited:', result);
+            setActorHasExited(true);
+            setIsGenerating(false);
             addMessage('system', 'Git assistant has shut down.');
             
             // Trigger app shutdown
@@ -205,6 +208,8 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
           
           onActorError: (error: any) => {
             console.error('Domain actor error:', error);
+            setActorHasExited(true);
+            setIsGenerating(false);
             const errorMessage = error instanceof Error ? error.message : String(error);
             addMessage('system', `Git assistant error: ${errorMessage}`);
             
@@ -326,7 +331,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
 
   // Send message function
   const sendMessage = useCallback(async (messageText: string) => {
-    if (!channel || !messageText.trim() || isGenerating) return;
+    if (!channel || !messageText.trim() || isGenerating || actorHasExited) return;
 
     try {
       setIsGenerating(true);
@@ -339,7 +344,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
       addMessage('system', `Error sending message: ${errorMessage}`);
       setIsGenerating(false);
     }
-  }, [channel, client, session, addMessage, isGenerating]);
+  }, [channel, client, session, addMessage, isGenerating, actorHasExited]);
 
   // Auto-exit logic for workflow mode
   useEffect(() => {
@@ -459,8 +464,8 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
                   />
                 ))}
 
-                {/* Show loading indicator when generating */}
-                {isGenerating && <LoadingIndicator />}
+                {/* Show loading indicator when generating (but not if actor has exited) */}
+                {isGenerating && !actorHasExited && <LoadingIndicator />}
               </>
             )}
           </Box>
@@ -470,9 +475,12 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
             <Box width="100%" paddingLeft={1} paddingRight={1} paddingBottom={1}>
               <Box width="100%">
                 <MultiLineInputWithModes
-                  placeholder={isGenerating ? "Processing..." : "Message: "}
+                  placeholder={
+                    actorHasExited ? "Assistant has shut down" : 
+                    isGenerating ? "Processing..." : "Message: "
+                  }
                   onSubmit={sendMessage}
-                  disabled={isGenerating}
+                  disabled={isGenerating || actorHasExited}
                 />
               </Box>
             </Box>
