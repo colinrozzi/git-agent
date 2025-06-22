@@ -317,7 +317,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
   }, [channel]);
 
   return (
-    <Box flexDirection="column" width="100%">
+    <Box flexDirection="column" height="100%" width="100%">
       {showHelp && (
         <HelpPanel
           shortcuts={[
@@ -457,7 +457,13 @@ export async function renderGitChatApp(
         repoPath={repoPath}
         workflow={workflow}
         mode={mode}
-      />
+      />,
+      {
+        // Key options to preserve terminal scrollback
+        patchConsole: false,    // Don't hijack console
+        exitOnCtrlC: false,     // Handle Ctrl+C manually
+        debug: false            // Disable debug mode
+      }
     );
 
     await app.waitUntilExit();
