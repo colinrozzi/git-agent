@@ -99,7 +99,7 @@ export function buildGitConfig(workflow: GitWorkflow, repoPath: string, mode: Ex
       manifest_path: "/Users/colinrozzi/work/actor-registry/git-chat-assistant/manifest.toml",
       initial_state: {
         current_directory: repoPath,
-        workflow: workflow === 'chat' ? undefined : workflow,
+        task: workflow === 'chat' ? undefined : workflow,
         auto_exit_on_completion: mode === 'workflow',
         ...workflowConfig
       }
