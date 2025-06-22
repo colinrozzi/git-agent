@@ -88,19 +88,11 @@ export function MessageComponent({
 
   return (
     <Box flexDirection="column" margin={1}>
-      {/* Message content */}
       {lines.map((line, index) => (
         <Text key={index} color={roleColor}>
           {index === 0 ? prefix : hasMultipleLines ? '   ' : ''}{line || ' '}
         </Text>
       ))}
-
-      {/* Optional timestamp */}
-      {showTimestamp && (
-        <Text color="gray" dimColor>
-          {message.timestamp.toLocaleTimeString()}
-        </Text>
-      )}
     </Box>
   );
 }
