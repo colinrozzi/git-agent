@@ -340,8 +340,8 @@ function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppPro
     <Box flexDirection="column" height="100%" width="100%">
       {session && (
         <Box flexDirection="column" alignItems="flex-start" >
-          <Text color="yellow"> git  actor-id: {session.domainActor.id} </Text>
-          <Text color="yellow"> chat actor-id: {session.chatActorId} </Text>
+          <Text color="yellow" dimColor> git  actor-id: {session.domainActor.id} </Text>
+          <Text color="yellow" dimColor> chat actor-id: {session.chatActorId} </Text>
         </Box>
       )}
 
