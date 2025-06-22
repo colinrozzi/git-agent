@@ -87,7 +87,7 @@ export function MessageComponent({
   const prefix = prefixes[role] || '';
 
   return (
-    <Box flexDirection="column" margin={1}>
+    <Box flexDirection="column" marginBottom={1}>
       {lines.map((line, index) => (
         <Text key={index} color={roleColor}>
           {index === 0 ? prefix : hasMultipleLines ? '   ' : ''}{line || ' '}
