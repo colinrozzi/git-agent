@@ -112,7 +112,7 @@ function ToolMessage({ toolName, toolArgs, toolDisplayMode, prefix }: ToolMessag
 
   if (toolDisplayMode === 'minimal') {
     return (
-      <Box>
+      <Box marginBottom={1}>
         <Text color="magenta" dimColor>
           {prefix}{toolName}{args ? `: ${args}` : ''}
         </Text>
