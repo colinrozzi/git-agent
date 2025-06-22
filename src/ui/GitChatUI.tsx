@@ -2,7 +2,7 @@
  * Git-focused chat UI component - simplified version
  */
 
-import { render, Box, Text } from 'ink';
+import { render, Box, Text, useStdin } from 'ink';
 import Spinner from 'ink-spinner';
 import { useState, useEffect, useCallback } from 'react';
 import {
@@ -57,9 +57,80 @@ function LoadingIndicator() {
 }
 
 /**
+ * MultiLineInput wrapper with proper vim-style mode management
+ */
+function MultiLineInputWithModes({ 
+  placeholder, 
+  onSubmit, 
+  disabled 
+}: {
+  placeholder: string;
+  onSubmit: (content: string) => void;
+  disabled: boolean;
+}) {
+  const [content, setContent] = useState('');
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const [mode, setMode] = useState<'insert' | 'command'>('insert');
+
+  const handleModeChange = useCallback((newMode: 'insert' | 'command') => {
+    console.log('[MultiLineInputWithModes] Mode changed:', newMode);
+    setMode(newMode);
+  }, []);
+
+  const handleSubmit = useCallback((submittedContent: string) => {
+    console.log('[MultiLineInputWithModes] Submit:', submittedContent);
+    onSubmit(submittedContent);
+    // Reset state after submit
+    setContent('');
+    setCursorPosition(0);
+    setMode('insert');
+  }, [onSubmit]);
+
+  return (
+    <Box flexDirection="column" width="100%">
+      <MultiLineInput
+        placeholder={placeholder}
+        onSubmit={handleSubmit}
+        disabled={disabled}
+        mode={mode}
+        onModeChange={handleModeChange}
+        content={content}
+        cursorPosition={cursorPosition}
+        onContentChange={setContent}
+        onCursorChange={setCursorPosition}
+      />
+      
+      {/* Mode help text */}
+      <Box paddingLeft={1}>
+        <Text color="gray" dimColor>
+          {mode === 'insert' ? (
+            "ESC: command mode"
+          ) : (
+            "ENTER: send • i: insert mode • ESC: back to insert"
+          )}
+        </Text>
+      </Box>
+    </Box>
+  );
+}
+
+/**
  * Main Git Chat application with simplified message handling
  */
 function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppProps) {
+  const { isRawModeSupported } = useStdin();
+  
+  // Check for raw mode support
+  if (!isRawModeSupported) {
+    return (
+      <Box flexDirection="column" padding={1}>
+        <Text color="red">❌ Raw mode not supported in this terminal environment</Text>
+        <Text color="gray">This application requires a TTY terminal with raw mode support.</Text>
+        <Text color="gray">Try running directly in your terminal instead of through a build tool.</Text>
+      </Box>
+    );
+  }
+  
   const [workflowCompleted, setWorkflowCompleted] = useState<boolean>(false);
   const [currentMode, setCurrentMode] = useState<ExecutionMode>(mode);
   const gracefulExit = useGracefulExit(client, session);
@@ -303,7 +374,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
           {(currentMode === 'interactive' || showHelp) && (
             <Box width="100%" paddingLeft={1} paddingRight={1} paddingBottom={1}>
               <Box width="100%">
-                <MultiLineInput
+                <MultiLineInputWithModes
                   placeholder={isGenerating ? "Processing..." : "Message: "}
                   onSubmit={sendMessage}
                   disabled={isGenerating}

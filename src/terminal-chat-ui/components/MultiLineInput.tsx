@@ -168,27 +168,39 @@ export function MultiLineInput({
         handleSubmit();
         return;
       } else if (mode === 'insert') {
-        // In insert mode, Return adds newline, Ctrl+Return submits
-        if (key.ctrl) {
-          handleSubmit();
-          return;
-        } else {
-          insertText('\n');
-          return;
-        }
+        // In insert mode, Return adds newline
+        insertText('\n');
+        return;
       }
     }
 
-    // Regular characters
+    // Command mode key handling
+    if (mode === 'command') {
+      if (input === 'i') {
+        // 'i' enters insert mode
+        onModeChange?.('insert');
+        return;
+      }
+      // In command mode, ignore most other keys except navigation
+      if (key.leftArrow) {
+        moveCursor(actualCursorPosition - 1);
+        return;
+      }
+      if (key.rightArrow) {
+        moveCursor(actualCursorPosition + 1);
+        return;
+      }
+      // Ignore other input in command mode
+      return;
+    }
+
+    // Insert mode: Regular characters
     if (input && !key.ctrl && !key.meta) {
       insertText(input);
       return;
     }
 
-    // Navigation only works in insert mode
-    if (mode !== 'insert') return;
-
-    // Arrow key navigation
+    // Insert mode only: Arrow key navigation
     if (key.leftArrow) {
       moveCursor(actualCursorPosition - 1);
       return;
@@ -224,7 +236,7 @@ export function MultiLineInput({
       return;
     }
 
-    // Delete
+    // Delete (insert mode only)
     if (key.backspace || key.delete) {
       deleteChar('backward');
       return;
@@ -267,7 +279,10 @@ export function MultiLineInput({
               return (
                 <Text key={index}>
                   {beforeCursor}
-                  <Text backgroundColor={disabled ? "gray" : "white"} color="black">
+                  <Text 
+                    backgroundColor={disabled ? "gray" : (mode === 'command' ? "blue" : "white")} 
+                    color={mode === 'command' ? "white" : "black"}
+                  >
                     {atCursor}
                   </Text>
                   {afterCursor}
