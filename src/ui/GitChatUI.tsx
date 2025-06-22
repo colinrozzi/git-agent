@@ -197,7 +197,16 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
             console.log('Domain actor exited:', result);
             setActorHasExited(true);
             setIsGenerating(false);
-            addMessage('system', 'Git assistant has shut down.');
+            
+            // Check if this was a successful workflow completion
+            const isSuccess = result?.Success !== undefined;
+            if (isSuccess && mode === 'workflow') {
+              // For workflow mode, just mark as completed without the "shut down" message
+              setWorkflowCompleted(true);
+            } else {
+              // For other cases or chat mode, show the shutdown message
+              addMessage('system', 'Git assistant has shut down.');
+            }
             
             // Trigger app shutdown
             setTimeout(async () => {
@@ -486,7 +495,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
             </Box>
           )}
 
-          {currentMode === 'workflow' && !workflowCompleted && (
+          {currentMode === 'workflow' && !workflowCompleted && !actorHasExited && (
             <Box paddingLeft={1}>
               <Text color="gray" dimColor>
                 workflow mode • Press 'i' to enter interactive chat
@@ -494,7 +503,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
             </Box>
           )}
 
-          {currentMode === 'interactive' && (
+          {currentMode === 'interactive' && !actorHasExited && (
             <Box paddingLeft={1} >
               <Text color="green" dimColor>
                 Interactive mode • Chat with git assistant
@@ -502,7 +511,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
             </Box>
           )}
 
-          {currentMode === 'workflow' && !workflowCompleted && (
+          {currentMode === 'workflow' && !workflowCompleted && !actorHasExited && (
             <Box paddingLeft={1} >
               <Text color="yellow" dimColor>
                 Workflow in progress • Press 'i' to switch to interactive mode
@@ -510,7 +519,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
             </Box>
           )}
 
-          {currentMode === 'workflow' && workflowCompleted && (
+          {currentMode === 'workflow' && (workflowCompleted || actorHasExited) && (
             <Box paddingLeft={1} paddingY={1}>
               <Text color="green">
                 ✓ Workflow complete • Cleaning up...
