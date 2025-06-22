@@ -146,11 +146,6 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
       console.log(chalk.gray(`Connecting to ${options.server || '127.0.0.1:9000'}`));
     }
 
-
-
-    // Show workflow banner
-    //showWorkflowBanner(workflow, repository);
-
     // Start the interactive UI
     await renderGitChatApp(options, config, repoPath, workflow, mode);
 
