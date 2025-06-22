@@ -145,7 +145,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
       if (options.verbose) {
         console.log('\nCleaning up actors...');
       }
-      
+
       // Close channel first
       if (channel) {
         try {
@@ -304,7 +304,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
 
   // Auto-exit logic for workflow mode
   useEffect(() => {
-    if (workflowCompleted && currentMode === 'workflow') {
+    if (workflowCompleted && currentMode === 'workflow' && false) {
       const autoExit = async () => {
         await cleanup();
         process.exit(0);
@@ -315,7 +315,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
 
   // Workflow completion detection
   useEffect(() => {
-    if (currentMode === 'workflow' && !isGenerating && messages.length > 0) {
+    if (currentMode === 'workflow' && !isGenerating && messages.length > 0 && false) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage?.role === 'assistant' && !isGenerating) {
         // Delay to show final message, then auto-exit
@@ -522,7 +522,7 @@ export async function renderGitChatApp(
 
     process.on('SIGINT', () => handleSignal('SIGINT'));
     process.on('SIGTERM', () => handleSignal('SIGTERM'));
-    
+
     // Also handle process exit
     process.on('exit', async () => {
       // Note: In 'exit' handler, you can't do async operations
