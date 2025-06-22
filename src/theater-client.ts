@@ -34,6 +34,9 @@ export class GitTheaterClient {
     const actor = await this.client.startActor({
       manifest: manifestPath,
       initialState: new TextEncoder().encode(JSON.stringify(initialState)),
+      onEvent: (event => {
+        //console.log(`Domain actor event: ${JSON.stringify(event)}`);
+      }),
       onError: (error => {
         console.error(`Domain actor error: ${error instanceof Error ? error.message : String(error)}`);
       }),
