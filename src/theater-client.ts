@@ -28,6 +28,35 @@ export class GitTheaterClient {
   }
 
   /**
+   * Start a domain actor
+   */
+  async startDomainActor(manifestPath: string, initialState: any = {}): Promise<Actor> {
+    const actor = await this.client.startActor({
+      manifest: manifestPath,
+      initialState: new TextEncoder().encode(JSON.stringify(initialState)),
+      parent: false,
+      subscribe: false
+    });
+
+    return actor;
+  }
+
+  /**
+   * Get the chat state actor ID from a domain actor
+   */
+  async getChatStateActorId(domainActor: Actor): Promise<string> {
+    const response = await domainActor.requestJson({
+      type: 'GetChatStateActorId'
+    });
+
+    if (response.type !== 'ChatStateActorId' || !response.actor_id) {
+      throw new Error(`Invalid response from git-chat-assistant: ${JSON.stringify(response)}`);
+    }
+
+    return response.actor_id;
+  }
+
+  /**
    * Start a git workflow session
    */
   async startGitSession(config: GitTheaterConfig): Promise<ChatSession> {

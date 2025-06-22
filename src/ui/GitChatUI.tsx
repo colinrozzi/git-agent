@@ -164,9 +164,17 @@ function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppPro
 
         setSetupStatus('starting_actor');
         setSetupMessage(`Spinning up Actor...`);
-        const session = await client.startGitSession(config);
+        const domainActor = await client.startDomainActor(config.actor.manifest_path, config.actor.initial_state);
+        setSetupMessage(`Actor started: ${domainActor.id}`);
+        setSetupStatus('loading_actor');
+        const chatActorId = await client.getChatStateActorId(domainActor);
+        setSetupMessage(`Chat actor ID: ${chatActorId}`);
+        setSetupStatus('ready');
+        const session: ChatSession = {
+          domainActor,
+          chatActorId
+        };
         setSession(session);
-        //await new Promise(resolve => setTimeout(resolve, 500));
 
         setSetupStatus('opening_channel');
         setSetupMessage('Opening communication channel...');
@@ -175,7 +183,6 @@ function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppPro
 
         setSetupStatus('loading_actor');
         setSetupMessage(`Starting ${workflow} workflow...`);
-        //await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Set up simplified message handler
         channelStream.onMessage((message) => {
