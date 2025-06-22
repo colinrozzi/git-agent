@@ -34,8 +34,16 @@ export class GitTheaterClient {
     const actor = await this.client.startActor({
       manifest: manifestPath,
       initialState: new TextEncoder().encode(JSON.stringify(initialState)),
-      parent: false,
-      subscribe: false
+      onError: (error => {
+        console.error(`Domain actor error: ${error instanceof Error ? error.message : String(error)}`);
+      }),
+      onActorResult: (result => {
+        if (result.type === 'Error') {
+          console.error(`Domain actor error: ${result.error instanceof Error ? result.error.message : String(result.error)}`);
+        } else {
+          console.log(`Domain actor result: ${JSON.stringify(result)}`);
+        }
+      })
     });
 
     return actor;
@@ -64,8 +72,19 @@ export class GitTheaterClient {
     const domainActor = await this.client.startActor({
       manifest: config.actor.manifest_path,
       initialState: new TextEncoder().encode(JSON.stringify(config.actor.initial_state)),
-      parent: false,
-      subscribe: false
+      onEvent: (event) => {
+        console.log(`Domain actor event: ${JSON.stringify(event)}`);
+      },
+      onError: (error) => {
+        console.error(`Domain actor error: ${error instanceof Error ? error.message : String(error)}`);
+      },
+      onActorResult: (result) => {
+        if (result.type === 'Error') {
+          console.error(`Domain actor error: ${result.error instanceof Error ? result.error.message : String(result.error)}`);
+        } else {
+          console.log(`Domain actor result: ${JSON.stringify(result)}`);
+        }
+      }
     });
 
     // Get chat-state actor ID from domain actor
