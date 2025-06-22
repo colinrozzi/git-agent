@@ -169,7 +169,6 @@ function GitChatApp({ options, config, repoPath, workflow, mode }: GitChatAppPro
         setSetupStatus('loading_actor');
         const chatActorId = await client.getChatStateActorId(domainActor);
         setSetupMessage(`Chat actor ID: ${chatActorId}`);
-        setSetupStatus('ready');
         const session: ChatSession = {
           domainActor,
           chatActorId
