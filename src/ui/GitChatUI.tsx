@@ -399,7 +399,7 @@ function GitChatApp({ client, session, repoPath, workflow, mode }: GitChatAppPro
           )}
 
           {currentMode === 'workflow' && (
-            <Box paddingLeft={1} paddingY={1}>
+            <Box paddingLeft={1} >
               <Text color="yellow" dimColor>
                 Workflow in progress • Press 'i' to switch to interactive mode
               </Text>
