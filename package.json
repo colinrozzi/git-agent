@@ -1,5 +1,5 @@
 {
-  "name": "git-theater",
+  "name": "git-agent",
   "version": "1.0.0",
   "description": "Git workflows powered by AI - streamlined interface for git-chat-assistant",
   "main": "dist/index.js",
@@ -8,7 +8,7 @@
   "author": "Colin Rozzi",
   "license": "MIT",
   "bin": {
-    "git-theater": "./dist/index.js",
+    "git-agent": "./dist/index.js",
     "commit": "./dist/index.js",
     "review": "./dist/index.js",
     "rebase": "./dist/index.js",
