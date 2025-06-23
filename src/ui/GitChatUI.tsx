@@ -17,8 +17,8 @@ import {
   MultiLineInput
 } from '../terminal-chat-ui/index.js';
 
-import type { GitRepository, GitWorkflow, ChatSession, ExecutionMode, CLIOptions, GitTheaterConfig } from '../types.js';
-import { GitTheaterClient, type ActorLifecycleCallbacks } from '../theater-client.js';
+import type { GitRepository, GitWorkflow, ChatSession, ExecutionMode, CLIOptions, GitAgentConfig } from '../types.js';
+import { GitAgentClient, type ActorLifecycleCallbacks } from '../theater-client.js';
 import type { ChannelStream } from 'theater-client';
 
 interface GitChatAppProps {
@@ -26,7 +26,7 @@ interface GitChatAppProps {
     server?: string;
     verbose?: boolean;
   };
-  config: GitTheaterConfig;
+  config: GitAgentConfig;
   repoPath: string;
   workflow: GitWorkflow;
   mode: ExecutionMode;
@@ -121,7 +121,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
 
   const [workflowCompleted, setWorkflowCompleted] = useState<boolean>(false);
   const [currentMode, setCurrentMode] = useState<ExecutionMode>(mode);
-  const [client, setClient] = useState<GitTheaterClient | null>(null);
+  const [client, setClient] = useState<GitAgentClient | null>(null);
   const [session, setSession] = useState<ChatSession | null>(null);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [channel, setChannel] = useState<ChannelStream | null>(null);
@@ -185,7 +185,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
         setSetupStatus('connecting');
         setSetupMessage('Connecting to Theater...');
 
-        const client = new GitTheaterClient(options.server || '127.0.0.1:9000', options.verbose || false);
+        const client = new GitAgentClient(options.server || '127.0.0.1:9000', options.verbose || false);
         setClient(client);
 
         setSetupStatus('starting_actor');
@@ -507,7 +507,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
  */
 export async function renderGitChatApp(
   options: CLIOptions,
-  config: GitTheaterConfig,
+  config: GitAgentConfig,
   repoPath: string,
   workflow: GitWorkflow,
   mode: ExecutionMode
