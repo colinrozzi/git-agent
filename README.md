@@ -1,4 +1,4 @@
-# Git Theater
+# Git Agent
 
 **Git workflows powered by AI** - A streamlined interface for the git-chat-assistant that makes git operations effortless.
 
@@ -16,7 +16,7 @@
 
 ```bash
 # Install dependencies
-cd /path/to/git-theater
+cd /path/to/git-agent
 bun install
 
 # Build the project
@@ -103,12 +103,12 @@ git-chat
 
 ### Explicit Commands
 
-You can also use the explicit `git-theater` command:
+You can also use the explicit `git-agent` command:
 
 ```bash
-git-theater commit --verbose
-git-theater review --directory /path/to/repo
-git-theater rebase --server 192.168.1.100:9000
+git-agent commit --verbose
+git-agent review --directory /path/to/repo
+git-agent rebase --server 192.168.1.100:9000
 ```
 
 ### Command Options
@@ -134,10 +134,10 @@ rebase --verbose
 
 ## How It Works
 
-Git Theater creates a streamlined interface around your existing `git-chat-assistant` actor:
+Git Agent creates a streamlined interface around your existing `git-chat-assistant` actor:
 
 ```
-git-theater → GitTheaterClient → git-chat-assistant → chat-state + git-tools
+git-agent → GitAgentClient → git-chat-assistant → chat-state + git-tools
 ```
 
 ### Workflow Process
@@ -195,7 +195,7 @@ bun run type-check
 ### Project Structure
 
 ```
-git-theater/
+git-agent/
 ├── src/
 │   ├── index.ts              # Main CLI entry point
 │   ├── types.ts              # Type definitions
@@ -384,4 +384,4 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**Git Theater** - Making git workflows intelligent and effortless!
+**Git Agent** - Making git workflows intelligent and effortless!
