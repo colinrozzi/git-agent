@@ -5,7 +5,7 @@
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
-import type { GitRepository, GitWorkflow, GitTheaterConfig, ExecutionMode } from './types.js';
+import type { GitRepository, GitWorkflow, GitAgentConfig, ExecutionMode } from './types.js';
 
 /**
  * Detect git repository by walking up directory tree
@@ -91,7 +91,7 @@ export function analyzeRepository(repoPath: string): GitRepository {
 /**
  * Build git-chat-assistant configuration
  */
-export function buildGitConfig(workflow: GitWorkflow, repoPath: string, mode: ExecutionMode = 'workflow'): GitTheaterConfig {
+export function buildGitConfig(workflow: GitWorkflow, repoPath: string, mode: ExecutionMode = 'workflow'): GitAgentConfig {
   const workflowConfig = getWorkflowConfig(workflow);
 
   return {
