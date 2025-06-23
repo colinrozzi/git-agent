@@ -1,5 +1,5 @@
 /**
- * Type definitions for git-theater
+ * Type definitions for git-agent
  */
 
 // Re-export shared types from terminal-chat-ui
@@ -10,11 +10,11 @@ export type {
   ChatSession
 } from './terminal-chat-ui/index.js';
 
-// Git-theater specific types
+// Git-agent specific types
 export type GitWorkflow = 'commit' | 'review' | 'rebase' | 'chat';
 export type ExecutionMode = 'workflow' | 'interactive';
 
-export interface GitTheaterConfig {
+export interface GitAgentConfig {
   actor: {
     manifest_path: string;
     initial_state?: GitAssistantInitialState;
