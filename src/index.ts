@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 
 /**
- * Git Theater - Git workflows powered by AI
+ * Git Agent - Git workflows powered by AI
  * 
  * Usage:
  *   commit          # Start commit workflow
  *   review          # Start review workflow  
  *   rebase          # Start rebase workflow
  *   git-chat        # General git chat
- *   git-theater     # With explicit command
+ *   git-agent       # With explicit command
  */
 
 import { program } from 'commander';
 import chalk from 'chalk';
 import path from 'path';
 import { detectGitRepository, analyzeRepository, buildGitConfig, validateGitRepository } from './git-detector.js';
-import { GitTheaterClient } from './theater-client.js';
+import { GitAgentClient } from './theater-client.js';
 import { renderGitChatApp } from './ui/GitChatUI.js';
 import type { GitWorkflow, CLIOptions, ExecutionMode } from './types.js';
 
@@ -33,13 +33,13 @@ function getWorkflowFromCommand(): GitWorkflow {
     case 'git-chat':
       return 'chat';
     default:
-      return 'chat'; // Default for git-theater
+      return 'chat'; // Default for git-agent
   }
 }
 
 // Main program setup
 program
-  .name('git-theater')
+  .name('git-agent')
   .description('Git workflows powered by AI')
   .version('1.0.0');
 
@@ -92,7 +92,7 @@ if (process.argv.length === 2) {
       verbose: false
     });
   } else {
-    // Default to showing help for git-theater
+    // Default to showing help for git-agent
     program.help();
   }
 } else {
