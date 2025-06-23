@@ -1,5 +1,5 @@
 /**
- * SimpleInput - basic single-line input (from git-theater style)
+ * SimpleInput - basic single-line input (from git-agent style)
  */
 
 import { Box, Text, useInput } from 'ink';
