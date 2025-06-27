@@ -201,7 +201,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
 
             // Check if this was a successful workflow completion
             const isSuccess = result?.Success !== undefined;
-            if (isSuccess && mode === 'workflow') {
+            if (isSuccess && mode === 'task') {
               // For workflow mode, just mark as completed without the "shut down" message
               setWorkflowCompleted(true);
             } else {
@@ -323,7 +323,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
 
         // Start git workflow
         //setIsGenerating(true);
-        if (mode === 'workflow') {
+        if (mode === 'task') {
           setIsGenerating(true);
         }
         await client.startGitWorkflow(session.domainActor);
@@ -371,7 +371,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
         key: 'i',
         description: 'Switch to interactive mode',
         action: () => {
-          if (currentMode === 'workflow') {
+          if (currentMode === 'task') {
             setCurrentMode('interactive');
           }
         }
@@ -484,7 +484,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
             </Box>
           )}
 
-          {currentMode === 'workflow' && !workflowCompleted && !actorHasExited && (
+          {currentMode === 'task' && !workflowCompleted && !actorHasExited && (
             <Box paddingLeft={1} >
               <Text color="yellow" dimColor>
                 Task in progress
@@ -492,7 +492,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
             </Box>
           )}
 
-          {currentMode === 'workflow' && (workflowCompleted || actorHasExited) && (
+          {currentMode === 'task' && (workflowCompleted || actorHasExited) && (
             <Box paddingLeft={1} >
               <Text color="green">
                 ✓ Task complete • Cleaning up...
