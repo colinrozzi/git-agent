@@ -38,7 +38,7 @@
     "ink-text-input": "^5.0.1",
     "react": "^18.2.0",
     "theater-client": "^0.1.0",
-    "terminal-chat-ui": "../terminal-chat-ui"
+    "terminal-chat-ui": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.3",
