@@ -91,7 +91,7 @@ export function analyzeRepository(repoPath: string): GitRepository {
 /**
  * Build task-manager configuration for git workflows
  */
-export function buildGitConfig(workflow: GitWorkflow, repoPath: string, mode: ExecutionMode = 'workflow'): GitAgentConfig {
+export function buildGitConfig(workflow: GitWorkflow, repoPath: string, mode: ExecutionMode = 'task'): GitAgentConfig {
   const workflowConfig = getWorkflowConfig(workflow);
   const systemPrompt = buildGitSystemPrompt(workflow, repoPath);
   const initialMessage = getWorkflowInitialMessage(workflow);
@@ -114,7 +114,7 @@ export function buildGitConfig(workflow: GitWorkflow, repoPath: string, mode: Ex
             tools: null
           }
         ],
-        auto_exit_on_completion: mode === 'workflow'
+        auto_exit_on_completion: mode === 'task'
       }
     },
     mode: mode
@@ -126,11 +126,11 @@ export function buildGitConfig(workflow: GitWorkflow, repoPath: string, mode: Ex
  */
 function buildGitSystemPrompt(workflow: GitWorkflow, repoPath: string): string {
   const directoryContext = `\n\nWORKING DIRECTORY: ${repoPath}\nAll git operations should be performed in this directory.`;
-  
+
   const basePrompt = "You are a Git Task Assistant with access to git tools. You specialize in completing specific git-related tasks efficiently and thoroughly.\n\nAVAILABLE CAPABILITIES:\n- Git repository operations (status, diff, log, branch management)\n- File staging and commit creation\n- Branch operations and history analysis\n- Code review and quality assessment\n- Repository cleanup and organization\n- Task completion signaling\n\nAPPROACH:\n- Always start by understanding the current repository state\n- Break down complex tasks into clear steps\n- Provide explanations for all git operations\n- Follow git best practices and conventions\n- Signal completion when tasks are finished";
 
   const taskContext = getTaskContext(workflow);
-  
+
   return `${basePrompt}${directoryContext}${taskContext}`;
 }
 
@@ -195,13 +195,13 @@ function getWorkflowInitialMessage(workflow: GitWorkflow): string | undefined {
   switch (workflow) {
     case 'commit':
       return "Please analyze the repository and commit any pending changes with appropriate commit messages. Start by checking git status to see what files have changed.";
-    
+
     case 'review':
       return "Please perform a comprehensive code review of the current changes. Start by examining what has been modified.";
-    
+
     case 'rebase':
       return "Please help me clean up the git history through an interactive rebase. Start by showing the current commit history.";
-    
+
     case 'chat':
     default:
       return undefined; // No auto-initiation for general chat
