@@ -12,7 +12,7 @@ export type {
 
 // Git-agent specific types
 export type GitWorkflow = 'commit' | 'review' | 'rebase' | 'chat';
-export type ExecutionMode = 'workflow' | 'interactive';
+export type ExecutionMode = 'task' | 'interactive';
 
 export interface GitAgentConfig {
   actor: {
@@ -26,7 +26,7 @@ export interface TaskManagerInitialState {
   // Core task definition
   system_prompt?: string;
   initial_message?: string;
-  
+
   // AI configuration  
   model_config?: {
     model: string;
@@ -34,7 +34,7 @@ export interface TaskManagerInitialState {
   };
   temperature?: number;
   max_tokens?: number;
-  
+
   // Tool configuration
   mcp_servers?: Array<{
     actor_id?: string | null;
@@ -44,7 +44,7 @@ export interface TaskManagerInitialState {
     };
     tools?: any;
   }>;
-  
+
   // Execution mode
   auto_exit_on_completion?: boolean;
 }
