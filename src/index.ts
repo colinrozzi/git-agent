@@ -142,7 +142,7 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
     if (options.verbose) {
       console.log(chalk.cyan(`Starting ${workflow} workflow in ${mode} mode...`));
       console.log(chalk.gray(`Mode: ${mode === 'workflow' ? 'Auto-exit when complete' : 'Interactive chat'}`));
-      console.log(chalk.gray(`Using git-chat-assistant actor`));
+      console.log(chalk.gray(`Using task-manager actor`));
       console.log(chalk.gray(`Connecting to ${options.server || '127.0.0.1:9000'}`));
     }
 

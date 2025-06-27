@@ -137,14 +137,14 @@ rebase --verbose
 Git Agent creates a streamlined interface around your existing `git-chat-assistant` actor:
 
 ```
-git-agent → GitAgentClient → git-chat-assistant → chat-state + git-tools
+git-agent → GitAgentClient → task-manager → chat-state + git-tools
 ```
 
 ### Workflow Process
 
 1. **Repository Detection** - Automatically finds the git repository
 2. **Repository Analysis** - Analyzes git status, branches, and changes  
-3. **Actor Setup** - Starts git-chat-assistant with workflow-specific configuration
+3. **Actor Setup** - Starts task-manager with workflow-specific configuration
 4. **Workflow Automation** - Triggers appropriate workflow (commit/review/rebase)
 5. **Interactive Chat** - Provides real-time chat interface with git context
 
@@ -163,13 +163,13 @@ Each workflow gets optimized settings:
 
 - **CLI Interface** (`src/index.ts`) - Command parsing and workflow routing
 - **Git Detection** (`src/git-detector.ts`) - Repository discovery and analysis
-- **Theater Client** (`src/theater-client.ts`) - git-chat-assistant communication  
+- **Theater Client** (`src/theater-client.ts`) - task-manager communication  
 - **UI Components** (`src/ui/`) - Rich terminal interface with Ink
 - **Type Definitions** (`src/types.ts`) - Comprehensive TypeScript types
 
 ### Dependencies
 
-- **git-chat-assistant** - Domain actor for git workflow intelligence
+- **task-manager** - General-purpose task orchestration actor
 - **theater-client** - Low-level Theater protocol client
 - **Ink** - React-based terminal UI framework
 - **Commander** - CLI argument parsing
@@ -219,13 +219,13 @@ git-agent/
 
 ## Configuration
 
-### Git Chat Assistant Path
+### Task Manager Path
 
-Update the manifest path in `src/git-detector.ts`:
+The task-manager path is automatically configured in `src/git-detector.ts`. If you need to use a different task-manager, update:
 
 ```typescript
-// Update this path to match your git-chat-assistant location
-manifest_path: "/path/to/your/git-chat-assistant/manifest.toml"
+// Update this path to match your task-manager location
+manifest_path: "/path/to/your/task-manager/manifest.toml"
 ```
 
 ### Theater Server
@@ -253,9 +253,9 @@ commit
 - Check Theater server is running: `theater-server --port 9000`
 - Verify server address: `commit --server 127.0.0.1:9000 --verbose`
 
-### "git-chat-assistant not found"
-- Update manifest path in `src/git-detector.ts`
-- Ensure git-chat-assistant is built: `cd /path/to/git-chat-assistant && cargo component build --release`
+### "task-manager not found"
+- Ensure task-manager is built: `cd /path/to/task-manager && cargo component build --release`
+- Update manifest path in `src/git-detector.ts` if using a different location
 
 ### Verbose Debugging
 
@@ -269,7 +269,7 @@ commit --verbose
 # Status: Has changes
 #    Modified: 3, Untracked: 1, Staged: 0
 # Starting commit workflow...
-# Using git-chat-assistant actor
+# Using task-manager actor
 # Connecting to 127.0.0.1:9000
 # Session started - Domain: actor-123, Chat: actor-456
 ```
@@ -378,7 +378,7 @@ MIT License - see LICENSE file for details.
 
 ## Related Projects
 
-- **[git-chat-assistant](../git-chat-assistant)** - The underlying AI actor for git workflows
+- **[task-manager](../task-manager)** - General-purpose task orchestration actor
 - **[theater-client](../theater-client)** - TypeScript client for Theater actor system  
 - **[theater-chat](../theater-chat)** - General-purpose Theater chat interface
 

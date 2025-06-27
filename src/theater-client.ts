@@ -1,5 +1,5 @@
 /**
- * Theater client wrapper for git workflows
+ * Theater client wrapper for git workflows using task-manager
  */
 
 import { TheaterClient, Actor, ChannelStream, setLogLevel } from 'theater-client';
@@ -50,12 +50,8 @@ export class GitAgentClient {
         if (callbacks?.onActorEvent) {
           callbacks.onActorEvent(event);
         }
-        // You can also log events if verbose mode is enabled
-        // console.log(`Domain actor event: ${JSON.stringify(event)}`);
       },
       onError: (error) => {
-        //console.error(`Domain actor error: ${error instanceof Error ? error.message : String(error)}`);
-
         // Call user-provided error callback
         if (callbacks?.onActorError) {
           callbacks.onActorError(error);
@@ -63,8 +59,6 @@ export class GitAgentClient {
       },
       onActorResult: (result) => {
         // This gets called when the actor exits/completes
-        //console.log(`Domain actor exited with result: ${JSON.stringify(result)}`);
-
         // Call user-provided exit callback
         if (callbacks?.onActorExit) {
           callbacks.onActorExit(result);
@@ -76,48 +70,44 @@ export class GitAgentClient {
   }
 
   /**
-   * Get the chat state actor ID from a domain actor
+   * Get the chat state actor ID from a task-manager actor
    */
-  async getChatStateActorId(domainActor: Actor): Promise<string> {
-    const response = await domainActor.requestJson({
+  async getChatStateActorId(taskManagerActor: Actor): Promise<string> {
+    const response = await taskManagerActor.requestJson({
       type: 'GetChatStateActorId'
     });
 
     if (response.type !== 'ChatStateActorId' || !response.actor_id) {
-      throw new Error(`Invalid response from git-chat-assistant: ${JSON.stringify(response)}`);
+      throw new Error(`Invalid response from task-manager: ${JSON.stringify(response)}`);
     }
 
     return response.actor_id;
   }
 
   /**
-   * Start a git workflow session with lifecycle callbacks
+   * Start a git workflow session using task-manager with lifecycle callbacks
    */
   async startGitSession(config: GitAgentConfig, callbacks?: ActorLifecycleCallbacks): Promise<ChatSession> {
-    // Start git-chat-assistant domain actor
-    const domainActor = await this.client.startActor({
+    // Start task-manager actor
+    const taskManagerActor = await this.client.startActor({
       manifest: config.actor.manifest_path,
       initialState: new TextEncoder().encode(JSON.stringify(config.actor.initial_state)),
       onEvent: (event) => {
         if (callbacks?.onActorEvent) {
           callbacks.onActorEvent(event);
         }
-        //console.log(`Domain actor event: ${JSON.stringify(event)}`);
       },
       onError: (error) => {
-        //console.error(`Domain actor error: ${error instanceof Error ? error.message : String(error)}`);
         if (callbacks?.onActorError) {
           callbacks.onActorError(error);
         }
       },
       onActorResult: (result) => {
         if (result.type === 'Error') {
-          //console.error(`Domain actor error: ${result.error instanceof Error ? result.error.message : String(result.error)}`);
           if (callbacks?.onActorError) {
             callbacks.onActorError(result.error);
           }
         } else {
-          //console.log(`Domain actor result: ${JSON.stringify(result)}`);
           if (callbacks?.onActorExit) {
             callbacks.onActorExit(result);
           }
@@ -125,28 +115,28 @@ export class GitAgentClient {
       }
     });
 
-    // Get chat-state actor ID from domain actor
-    const chatStateResponse = await domainActor.requestJson({
+    // Get chat-state actor ID from task-manager
+    const chatStateResponse = await taskManagerActor.requestJson({
       type: 'GetChatStateActorId'
     });
 
     if (chatStateResponse.type !== 'ChatStateActorId' || !chatStateResponse.actor_id) {
-      throw new Error(`Invalid response from git-chat-assistant: ${JSON.stringify(chatStateResponse)}`);
+      throw new Error(`Invalid response from task-manager: ${JSON.stringify(chatStateResponse)}`);
     }
 
     const chatActorId = chatStateResponse.actor_id;
 
     return {
-      domainActor,
+      domainActor: taskManagerActor,
       chatActorId
     };
   }
 
   /**
-   * Start the git workflow automation
+   * Start the git workflow automation using task-manager
    */
-  async startGitWorkflow(domainActor: Actor): Promise<void> {
-    const response = await domainActor.requestJson({
+  async startGitWorkflow(taskManagerActor: Actor): Promise<void> {
+    const response = await taskManagerActor.requestJson({
       type: 'StartChat'
     });
 
@@ -155,14 +145,14 @@ export class GitAgentClient {
     } else if (response.type === 'Error') {
       throw new Error(`Failed to start git workflow: ${response.message}`);
     } else {
-      throw new Error(`Invalid response from git-chat-assistant: ${JSON.stringify(response)}`);
+      throw new Error(`Invalid response from task-manager: ${JSON.stringify(response)}`);
     }
   }
 
   /**
-   * Send a message through the git domain actor
+   * Send a message through the task-manager actor
    */
-  async sendMessage(domainActor: Actor, message: string): Promise<void> {
+  async sendMessage(taskManagerActor: Actor, message: string): Promise<void> {
     const messageData = {
       type: 'AddMessage',
       message: {
@@ -171,10 +161,10 @@ export class GitAgentClient {
       }
     };
 
-    const response = await domainActor.requestJson(messageData);
+    const response = await taskManagerActor.requestJson(messageData);
 
     if (response.type !== 'Success') {
-      throw new Error(`Git assistant rejected message: ${JSON.stringify(response)}`);
+      throw new Error(`Task manager rejected message: ${JSON.stringify(response)}`);
     }
   }
 

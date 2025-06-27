@@ -17,23 +17,44 @@ export type ExecutionMode = 'workflow' | 'interactive';
 export interface GitAgentConfig {
   actor: {
     manifest_path: string;
-    initial_state?: GitAssistantInitialState;
+    initial_state?: TaskManagerInitialState;
   };
   mode: ExecutionMode;
 }
 
-export interface GitAssistantInitialState {
-  current_directory: string;
-  task?: GitWorkflow;
-  temperature?: number;
-  max_tokens?: number;
-  title?: string;
-  description?: string;
-  auto_exit_on_completion?: boolean;
+export interface TaskManagerInitialState {
+  // Core task definition
+  system_prompt?: string;
+  initial_message?: string;
+  
+  // AI configuration  
   model_config?: {
     model: string;
     provider: string;
   };
+  temperature?: number;
+  max_tokens?: number;
+  
+  // Tool configuration
+  mcp_servers?: Array<{
+    actor_id?: string | null;
+    actor?: {
+      manifest_path: string;
+      init_state?: any;
+    };
+    tools?: any;
+  }>;
+  
+  // Execution mode
+  auto_exit_on_completion?: boolean;
+}
+
+// Legacy type alias for compatibility
+export interface GitAssistantInitialState extends TaskManagerInitialState {
+  current_directory?: string;
+  task?: GitWorkflow;
+  title?: string;
+  description?: string;
 }
 
 export interface GitRepository {
