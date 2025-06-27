@@ -19,6 +19,7 @@ import {
 
 import type { GitRepository, GitWorkflow, ChatSession, ExecutionMode, CLIOptions, GitAgentConfig } from '../types.js';
 import { GitAgentClient, type ActorLifecycleCallbacks } from '../theater-client.js';
+import { formatActorError } from '../error-parser.js';
 import type { ChannelStream } from 'theater-client';
 
 interface GitChatAppProps {
@@ -216,10 +217,12 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
           },
 
           onActorError: (error: any) => {
-            console.error('Domain actor error:', error);
+            if (options.verbose) {
+              console.error('Domain actor error:', JSON.stringify(error, null, 2));
+            }
             setActorHasExited(true);
             setIsGenerating(false);
-            const errorMessage = error instanceof Error ? error.message : String(error);
+            const errorMessage = formatActorError(error);
             addMessage('system', `Git assistant error: ${errorMessage}`);
 
             // Trigger app shutdown on error
@@ -311,7 +314,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
               }
             }
           } catch (error) {
-            addMessage('system', `Error: ${error instanceof Error ? error.message : String(error)}`);
+            addMessage('system', `Error: ${formatActorError(error)}`);
             setIsGenerating(false);
           }
         });
@@ -329,7 +332,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
 
       } catch (error) {
         setSetupStatus('error');
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage = formatActorError(error);
         setSetupMessage(`Error: ${errorMessage}`);
         setIsGenerating(false);
       }
@@ -349,7 +352,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
       await client.sendMessage(session.domainActor, messageText.trim());
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = formatActorError(error);
       addMessage('system', `Error sending message: ${errorMessage}`);
       setIsGenerating(false);
     }
