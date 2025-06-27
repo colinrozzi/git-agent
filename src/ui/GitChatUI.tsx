@@ -15,7 +15,7 @@ import {
   type ToolDisplayMode,
   type SetupStatus,
   MultiLineInput
-} from '../terminal-chat-ui/index.js';
+} from 'terminal-chat-ui';
 
 import type { GitRepository, GitWorkflow, ChatSession, ExecutionMode, CLIOptions, GitAgentConfig } from '../types.js';
 import { GitAgentClient, type ActorLifecycleCallbacks } from '../theater-client.js';

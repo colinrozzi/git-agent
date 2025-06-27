@@ -8,7 +8,7 @@ export type {
   SetupStatus,
   ToolDisplayMode,
   ChatSession
-} from './terminal-chat-ui/index.js';
+} from 'terminal-chat-ui';
 
 // Git-agent specific types
 export type GitWorkflow = 'commit' | 'review' | 'rebase' | 'chat';
