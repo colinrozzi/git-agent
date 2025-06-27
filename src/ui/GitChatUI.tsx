@@ -223,7 +223,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
             setActorHasExited(true);
             setIsGenerating(false);
             const errorMessage = formatActorError(error);
-            addMessage('system', `Git assistant error: ${errorMessage}`);
+            addMessage('error', `Git assistant error: ${errorMessage}`);
 
             // Trigger app shutdown on error
             setTimeout(async () => {
@@ -314,7 +314,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
               }
             }
           } catch (error) {
-            addMessage('system', `Error: ${formatActorError(error)}`);
+            addMessage('error', `Error: ${formatActorError(error)}`);
             setIsGenerating(false);
           }
         });
@@ -353,7 +353,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
 
     } catch (error) {
       const errorMessage = formatActorError(error);
-      addMessage('system', `Error sending message: ${errorMessage}`);
+      addMessage('error', `Error sending message: ${errorMessage}`);
       setIsGenerating(false);
     }
   }, [channel, client, session, addMessage, isGenerating, actorHasExited]);

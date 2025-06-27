@@ -34,13 +34,14 @@ export function MessageComponent({
       user: 'You: ',
       assistant: 'Assistant: ',
       system: '[system] ',
-      tool: '[tool] '
+      tool: '[tool] ',
+      error: '[error] '
     };
 
     // Customize based on variant
     switch (variant) {
       case 'git':
-        return { ...base, system: '[git] ' };
+        return { ...base, system: '[git] ', error: '[git] ' };
       case 'chat':
         return { ...base, assistant: 'Chat: ' };
       default:
@@ -59,7 +60,8 @@ export function MessageComponent({
       user: 'gray',
       assistant: 'white',
       system: 'gray',
-      tool: 'magenta'
+      tool: 'magenta',
+      error: 'red'
     }[role] || 'white';
   };
 

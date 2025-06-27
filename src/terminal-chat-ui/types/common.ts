@@ -4,7 +4,7 @@
 
 // Simplified message structure - no more pending state management
 export interface Message {
-  role: 'user' | 'assistant' | 'system' | 'tool';
+  role: 'user' | 'assistant' | 'system' | 'tool' | 'error';
   content: string;
   timestamp: Date;
   status: 'complete'; // Always complete - no more pending
