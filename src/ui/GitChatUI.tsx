@@ -493,7 +493,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
           )}
 
           {currentMode === 'workflow' && (workflowCompleted || actorHasExited) && (
-            <Box paddingLeft={1} paddingY={1}>
+            <Box paddingLeft={1} >
               <Text color="green">
                 ✓ Task complete • Cleaning up...
               </Text>
