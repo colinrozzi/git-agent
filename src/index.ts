@@ -85,7 +85,7 @@ if (process.argv.length === 2) {
   const workflow = getWorkflowFromCommand();
   if (workflow !== 'chat' || path.basename(process.argv[1]) === 'git-chat') {
     // Direct workflow command - run with default options
-    const defaultMode = workflow === 'chat' ? 'interactive' : 'workflow';
+    const defaultMode = workflow === 'chat' ? 'interactive' : 'task';
     runWorkflow(workflow, {
       server: '127.0.0.1:9000',
       mode: defaultMode,
@@ -130,9 +130,9 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
     */
 
     // Validate mode
-    const mode = options.mode || (workflow === 'chat' ? 'interactive' : 'workflow');
-    if (mode !== 'workflow' && mode !== 'interactive') {
-      console.error(chalk.red(`❌ Invalid mode: ${mode}. Must be 'workflow' or 'interactive'`));
+    const mode = options.mode || (workflow === 'chat' ? 'interactive' : 'task');
+    if (mode !== 'task' && mode !== 'interactive') {
+      console.error(chalk.red(`❌ Invalid mode: ${mode}. Must be 'task' or 'interactive'`));
       process.exit(1);
     }
 
@@ -140,8 +140,8 @@ async function runWorkflow(workflow: GitWorkflow, options: CLIOptions): Promise<
     const config = buildGitConfig(workflow, repoPath, mode);
 
     if (options.verbose) {
-      console.log(chalk.cyan(`Starting ${workflow} workflow in ${mode} mode...`));
-      console.log(chalk.gray(`Mode: ${mode === 'workflow' ? 'Auto-exit when complete' : 'Interactive chat'}`));
+      console.log(chalk.cyan(`Starting ${workflow} task in ${mode} mode...`));
+      console.log(chalk.gray(`Mode: ${mode === 'task' ? 'Auto-exit when complete' : 'Interactive chat'}`));
       console.log(chalk.gray(`Using task-manager actor`));
       console.log(chalk.gray(`Connecting to ${options.server || '127.0.0.1:9000'}`));
     }
