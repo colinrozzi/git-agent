@@ -1,6 +1,6 @@
 {
   "name": "git-agent",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Git workflows powered by AI - streamlined interface for git-chat-assistant",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
