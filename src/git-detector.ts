@@ -98,7 +98,7 @@ export function buildGitConfig(workflow: GitWorkflow, repoPath: string, mode: Ex
 
   return {
     actor: {
-      manifest_path: "https://github.com/colinrozzi/task-manager/releases/download/v0.1.0/manifest.toml",
+      manifest_path: "https://github.com/colinrozzi/task-manager/releases/latest/download/manifest.toml",
       initial_state: {
         system_prompt: systemPrompt,
         initial_message: initialMessage,
