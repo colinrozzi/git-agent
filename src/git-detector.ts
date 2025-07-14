@@ -98,11 +98,12 @@ export function buildGitConfig(workflow: GitWorkflow, repoPath: string, mode: Ex
 
   return {
     actor: {
-      manifest_path: "https://github.com/colinrozzi/task-manager/releases/latest/download/manifest.toml",
+      manifest_path: "/Users/colinrozzi/work/actor-registry/task-manager/manifest.toml",
+      //"https://github.com/colinrozzi/task-manager/releases/latest/download/manifest.toml",
       initial_state: {
         system_prompt: systemPrompt,
         initial_message: initialMessage,
-        model_config: workflowConfig.model_config,
+        model_proxy: workflowConfig.model_proxy,
         temperature: workflowConfig.temperature,
         max_tokens: workflowConfig.max_tokens,
         mcp_servers: [
@@ -216,33 +217,37 @@ function getWorkflowConfig(workflow: GitWorkflow) {
     commit: {
       temperature: 0.3,
       max_tokens: 4096,
-      model_config: {
+      model_proxy: {
+        manifest_path: "https://github.com/colinrozzi/google-proxy/releases/latest/download/manifest.toml",
+        init_state: null,
         model: "gemini-2.0-flash",
-        provider: "google"
       }
     },
     review: {
       temperature: 0.5,
       max_tokens: 8192,
-      model_config: {
-        model: "claude-sonnet-4-20250514",
-        provider: "anthropic"
+      model_proxy: {
+        manifest_path: "https://github.com/colinrozzi/google-proxy/releases/latest/download/manifest.toml",
+        init_state: null,
+        model: "gemini-2.0-flash",
       }
     },
     rebase: {
       temperature: 0.4,
       max_tokens: 6144,
-      model_config: {
-        model: "claude-sonnet-4-20250514",
-        provider: "anthropic"
+      model_proxy: {
+        manifest_path: "https://github.com/colinrozzi/google-proxy/releases/latest/download/manifest.toml",
+        init_state: null,
+        model: "gemini-2.0-flash",
       }
     },
     chat: {
       temperature: 0.7,
       max_tokens: 8192,
-      model_config: {
-        model: "claude-sonnet-4-20250514",
-        provider: "anthropic"
+      model_proxy: {
+        manifest_path: "https://github.com/colinrozzi/google-proxy/releases/latest/download/manifest.toml",
+        init_state: null,
+        model: "gemini-2.0-flash",
       }
     }
   };

@@ -28,9 +28,10 @@ export interface TaskManagerInitialState {
   initial_message?: string;
 
   // AI configuration  
-  model_config?: {
+  model_proxy?: {
+    manifest_path: string;
+    init_state?: any;
     model: string;
-    provider: string;
   };
   temperature?: number;
   max_tokens?: number;
