@@ -292,11 +292,11 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
                         addMessage('assistant', textContent);
                       }
                     } else if (block?.ToolUse) {
+
                       // Add tool message immediately
                       // ToolUse content comes as a byte array, we must parse it into a string
                       const toolUseContent = block.ToolUse;
-                      const toolUseText = Buffer.from(toolUseContent).toString('utf8');
-                      addToolMessage(block.name, [toolUseText]);
+                      addToolMessage(block.ToolUse.name, block.ToolUse.input);
                     }
                   }
                 } else if (typeof messageContent === 'string' && messageContent.trim()) {
