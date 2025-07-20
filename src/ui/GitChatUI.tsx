@@ -315,7 +315,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
                 if (messageEntry?.Message?.content[0]?.Text) {
                   addMessage('user', messageEntry?.Message?.content[0]?.Text || '');
                 } else if (messageEntry?.Message?.content[0]?.ToolResult) {
-                  addMessage('user', messageEntry?.Message?.content[0]?.ToolResult || '');
+                  //addMessage('user', messageEntry?.Message?.content[0]?.ToolResult || '');
                 }
               }
             }
