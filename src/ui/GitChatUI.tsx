@@ -267,12 +267,13 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
         // Set up simplified message handler
         channelStream.onMessage((message) => {
           try {
+            console.log('Received message:', message);
             const messageText = Buffer.from(message.data).toString('utf8');
             const parsedMessage = JSON.parse(messageText);
 
             if (parsedMessage.type === 'chat_message' && parsedMessage.message) {
               const messageEntry = parsedMessage?.message?.entry;
-              const isUserMessage = messageEntry?.Message?.role === 'user';
+              const isUserMessage = messageEntry?.Message?.role === 'User';
 
               // Only process assistant messages
               if (!isUserMessage) {
@@ -284,7 +285,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
 
                   // Process all content blocks
                   for (const block of messageContent) {
-                    if (block?.type === 'text' && block?.text) {
+                    if (block?.text) {
                       textContent += block.text;
 
                       // Add text content as a regular message if we have any
