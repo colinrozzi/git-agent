@@ -156,8 +156,8 @@ export class GitAgentClient {
     const messageData = {
       type: 'AddMessage',
       message: {
-        role: 'user',
-        content: [{ type: 'text', text: message }]
+        role: 'User',
+        content: [{ 'Text': message }]
       }
     };
 
