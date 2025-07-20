@@ -291,7 +291,7 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
                       if (textContent.trim()) {
                         addMessage('assistant', textContent);
                       }
-                    } else if (block?.type === 'tool_use') {
+                    } else if (block?.ToolUse) {
                       // Add tool message immediately
                       addToolMessage(block?.name || 'unknown',
                         block?.input ? Object.values(block.input) : []);
@@ -310,7 +310,11 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
                 // Add user message directly
                 //console.log('User message received:', messageEntry?.Message?.content);
                 //console.log('User message text:', messageEntry?.Message?.content[0]?.text);
-                addMessage('user', messageEntry?.Message?.content[0]?.text || '');
+                if (messageEntry?.Message?.content[0]?.Text) {
+                  addMessage('user', messageEntry?.Message?.content[0]?.Text || '');
+                } else if (messageEntry?.Message?.content[0]?.ToolResult) {
+                  addMessage('user', messageEntry?.Message?.content[0]?.ToolResult || '');
+                }
               }
             }
           } catch (error) {
