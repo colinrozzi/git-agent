@@ -98,7 +98,7 @@ export function buildGitConfig(workflow: GitWorkflow, repoPath: string, mode: Ex
 
   return {
     actor: {
-      manifest_path: "https://github.com/colinrozzi/task-manager/releases/latest/download/manifest.toml",
+      manifest_path: "/Users/colinrozzi/work/actor-registry/task-manager/manifest.toml",
       initial_state: {
         system_prompt: systemPrompt,
         initial_message: initialMessage,
@@ -107,11 +107,17 @@ export function buildGitConfig(workflow: GitWorkflow, repoPath: string, mode: Ex
         max_tokens: workflowConfig.max_tokens,
         mcp_servers: [
           {
-            actor_id: null,
             actor: {
-              manifest_path: "https://github.com/colinrozzi/git-mcp-actor/releases/latest/download/manifest.toml"
-            },
-            tools: null
+              manifest_path: "/Users/colinrozzi/work/actor-registry/command-mcp-actor/manifest.toml",
+              init_state: {
+                tool_name: "git-command",
+                tool_description: "Execute git commands. Provide 'args' as an array of strings for the git command arguments.",
+                program: "git",
+                child_manifest_url: "/Users/colinrozzi/work/actor-registry/os-command-wrapper/manifest.toml",
+                default_working_directory: repoPath,
+                default_timeout_seconds: 30
+              }
+            }
           }
         ],
         auto_exit_on_completion: mode === 'task'
@@ -217,7 +223,7 @@ function getWorkflowConfig(workflow: GitWorkflow) {
       temperature: 0.3,
       max_tokens: 4096,
       model_proxy: {
-        manifest_path: "https://github.com/colinrozzi/google-proxy/releases/latest/download/manifest.toml",
+        manifest_path: "/Users/colinrozzi/work/actor-registry/google-proxy/manifest.toml",
         init_state: null,
         model: "gemini-2.0-flash",
       }
