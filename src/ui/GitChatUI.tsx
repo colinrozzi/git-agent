@@ -267,9 +267,9 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
         // Set up simplified message handler
         channelStream.onMessage((message) => {
           try {
-            console.log('Received message:', message);
             const messageText = Buffer.from(message.data).toString('utf8');
             const parsedMessage = JSON.parse(messageText);
+            console.log(`Received message: ${messageText}`);
 
             if (parsedMessage.type === 'chat_message' && parsedMessage.message) {
               const messageEntry = parsedMessage?.message?.entry;
