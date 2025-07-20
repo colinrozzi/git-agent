@@ -269,7 +269,6 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
           try {
             const messageText = Buffer.from(message.data).toString('utf8');
             const parsedMessage = JSON.parse(messageText);
-            console.log(`Received message: ${messageText}`);
 
             if (parsedMessage.type === 'chat_message' && parsedMessage.message) {
               const messageEntry = parsedMessage?.message?.entry;
@@ -285,8 +284,8 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
 
                   // Process all content blocks
                   for (const block of messageContent) {
-                    if (block?.text) {
-                      textContent += block.text;
+                    if (block?.Text) {
+                      textContent += block.Text;
 
                       // Add text content as a regular message if we have any
                       if (textContent.trim()) {
