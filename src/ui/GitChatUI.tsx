@@ -295,8 +295,9 @@ function GitChatApp({ options, config, repoPath, workflow, mode, onCleanupReady 
 
                       // Add tool message immediately
                       // ToolUse content comes as a byte array, we must parse it into a string
-                      const toolUseContent = block.ToolUse;
-                      addToolMessage(block.ToolUse.name, block.ToolUse.input);
+                      const toolUseContent = block.ToolUse.input;
+                      const toolUseText = Buffer.from(toolUseContent).toString('utf8');
+                      addToolMessage(block.ToolUse.name, [toolUseText]);
                     }
                   }
                 } else if (typeof messageContent === 'string' && messageContent.trim()) {
